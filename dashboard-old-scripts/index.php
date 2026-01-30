@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!--define other scripts and links that will be used in the dashboard page-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Renewable Integration Research Facility</title>
+    <!-- Favicon testing -->
+    <link rel="icon" type="image/x-icon" href="assets/images/faviconv2.svg">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/dashboard.css"> 
+    <link rel="stylesheet" href="assets/carousel.css">
+    <link rel="stylesheet" href="assets/highcharts.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto' >
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="carousel.js" defer></script>
+    <script src="sidebar.js" defer></script>
+    <script src="updateGauges.js" defer></script>
+    <script src="gauge.js" defer></script> <!-- defer to load by the order as appears-->
+    <script src="timeSeries.js" defer></script>
+    <script src="Wind_API.js" defer></script>
+    
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script src="https://code.highcharts.com/modules/boost.js"></script>
+</head>
+
+<body style="background-color: #FFFFFF">
+<!--
+ <div class="navbar"> 
+    <div class="dropdown">
+        <button class="dropbtn">Dropdown
+        </button>
+        <div class="dropdown-content">
+            <a href="#">Solar</a>
+            <a href="#">Wind</a>
+            <a href="#">Solar</a>
+            <a href="#">Battery</a>
+        </div>
+    </div>
+</div> 
+-->
+<!-- Sidebar -->
+<div class="sidebar" id="left-sidebar">
+  <a id="close" class="bar-item">Close</a>
+  <a  href="#" class="bar-item">Solar</a>
+  <a  href="#" class="bar-item">Hydro</a>
+  <a  href="#" class="bar-item">Wind</a>
+  <a  href="#" class="bar-item">Battery</a>
+</div>
+<h1><button onclick="sidebar_toggle()" class="bar-button" id="open"><i class="fa fa-bars"></i></button> Renewable Integration Research Facility <br />
+    <!--<span style="font-size: 50px">PPL R&D</span>-->
+</h1>
+
+<div class="dashboard">
+<div class="dashboard-container" id = "master">
+    <div class="carousel" data-carousel>
+    <button class = "carousel-button prev" data-carousel-button="prev"> &#8656;</button>
+    <button class = "carousel-button next" data-carousel-button="next"> &#8658;</button>
+    <ul data-slides>
+        <li class ="carousel-slide" data-active>
+        <!--Build Gauges Boxes-->
+        <div class="gauge-grid-container"> <!-- HERE -->
+            <!-- Dial Grid -->
+            <div class="gauge-grid">
+            <div class="box">
+                    <svg id="solarGauge" ></svg>
+            </div>
+            <div class="box">
+                    <svg id="windGauge" ></svg>
+            </div>
+            <div class="box">
+                    <svg id="hydroGauge" ></svg>
+            </div>
+            <div class="box">
+                    <svg id="batteryGauge" ></svg>
+            </div>
+            </div>
+        </div> 
+        </li>
+
+        <!-- Container for data points -->
+        <li class="carousel-slide">
+            <div class="data-grid-container">
+<?php
+$config = require __DIR__ . '/config/API/ConfigAPI.php';
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+// Fetch the JSON data from the external URL
+$jsonUrl = 'https://m.lkeportal.com/publicsolarbatch/ESS.json';
+$jsonData = file_get_contents($jsonUrl);
+
+// Decode the JSON data 
+// BUG: Sometimes json fails to decode
+$decodedData = json_decode($jsonData, true); 
+if (!$decodedData) {
+    //die("Error: Failed to Decode JSON...");
+}
+
+//Fetch wind data from API
+$url = $config['url'];
+$token = $config['token'];
+
+// Initialize a cURL session
+$ch = curl_init($url);
+
+// Set cURL options
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "Authorization: $token"
+]);
+
+// Execute the request
+$response = curl_exec($ch);
+
+// Check for errors
+if (curl_errno($ch)) {
+    echo 'Curl error: ' . curl_error($ch);
+    curl_close($ch);
+    exit;
+}
+
+// Close the cURL session
+curl_close($ch);
+
+// Decode the JSON response and get the needed data to use it later
+$data = json_decode($response, true);
+$SOH = isset($decodedData[0]['Battery State of Health (SOH %)']) ? $decodedData[0]['Battery State of Health (SOH %)'] : 'N/A';
+$batterVolt = isset($decodedData[0]['Battery DC Voltage']) ? $decodedData[0]['Battery DC Voltage'] : 'N/A';
+$batteryCurr = isset($decodedData[0]['Battery DC Current']) ? $decodedData[0]['Battery DC Current'] : 'N/A';
+$aveCellVolt = isset($decodedData[0]['Battery Average Cell Voltage']) ? $decodedData[0]['Battery Average Cell Voltage'] : 'N/A';
+$ambTemp = isset($decodedData[0]['Exterior Temperature (C)']) ? $decodedData[0]['Exterior Temperature (C)'] : 'N/A';
+$batteryPowAva = isset($decodedData[0]['Battery Power Available (kW)']) ? $decodedData[0]['Battery Power Available (kW)'] : 'N/A';
+$batteryPow = isset($decodedData[0]['Battery Power (kW)']) ? $decodedData[0]['Battery Power (kW)'] : 'N/A';
+$maxModuleTemp = isset($decodedData[0]['Battery Maximum Module Temp (C)']) ? $decodedData[0]['Battery Maximum Module Temp (C)'] : 'N/A';
+$minModuleTemp = isset($decodedData[0]['Battery Minimum Module Temp (C)']) ? $decodedData[0]['Battery Minimum Module Temp (C)'] : 'N/A';
+$maxCellVolt = isset($decodedData[0]['Battery Maximum Cell Voltage']) ? $decodedData[0]['Battery Maximum Cell Voltage'] : 'N/A';
+$minCellVolt = isset($decodedData[0]['Battery Minimum Cell Voltage']) ? $decodedData[0]['Battery Minimum Cell Voltage'] : 'N/A';
+$BatteryContainerTemp1 = isset($decodedData[0]['Battery Container 1 Temp (C)']) ? $decodedData[0]['Battery Container 1 Temp (C)'] : 'N/A';
+$BatteryContainerTemp2 = isset($decodedData[0]['Battery Container 2 Temp (C)']) ? $decodedData[0]['Battery Container 2 Temp (C)'] : 'N/A';
+$solarIrradiance = isset($decodedData[0]['Solar Irradiance (GHI WM2)']) ? $decodedData[0]['Solar Irradiance (GHI WM2)'] : 'N/A';
+$dix1 = isset($decodedData[0]['Dix 1 Hydro Generation (MW)']) ? $decodedData[0]['Dix 1 Hydro Generation (MW)'] : 'N/A';
+$dix2 = isset($decodedData[0]['Dix 2 Hydro Generation (MW)']) ? $decodedData[0]['Dix 2 Hydro Generation (MW)'] : 'N/A';
+$dix3 = isset($decodedData[0]['Dix 3 Hydro Generation (MW)']) ? $decodedData[0]['Dix 3 Hydro Generation (MW)'] : 'N/A';
+
+//Generation and battery powers
+$solarGen = max(isset($decodedData[0]['Solar Generation (kW)']) ? $decodedData[0]['Solar Generation (kW)'] : 'N/A', 0);
+//$solarGenNegative = isset($decodedData[0]['Solar Generation (kW)']) ? $decodedData[0]['Solar Generation (kW)'] : 'N/A';
+//$hydroGen = max(isset($decodedData[0]['Hydro Generation (kW)']) ? $decodedData[0]['Hydro Generation (kW)'] : 'N/A', 0);
+//$windGen = max(isset($decodedData[0]['Wind Generation (kW)']) ? $decodedData[0]['Wind Generation (kW)'] : 'N/A', 0);
+//$batteryPower = isset($decodedData[0]['Battery Power (kW)']) ? $decodedData[0]['Battery Power (kW)'] : 'N/A';
+$solarGenNegative = isset($decodedData[0]['Solar Generation (kW)']) ? (float)$decodedData[0]['Solar Generation (kW)'] : 0;
+$windGen         = isset($decodedData[0]['Wind Generation (kW)'])  ? (float)$decodedData[0]['Wind Generation (kW)']  : 0;
+$hydroGen        = isset($decodedData[0]['Hydro Generation (kW)']) ? (float)$decodedData[0]['Hydro Generation (kW)'] : 0;
+$batteryPower    = isset($decodedData[0]['Battery Power (kW)'])    ? (float)$decodedData[0]['Battery Power (kW)']    : 0;
+
+$multiAxisSolarGen = max(isset($decodedData[0]['Solar 360 Trackers (kW)']) ? $decodedData[0]['Solar 360 Trackers (kW)'] : 'N/A', 0);
+$fixedSolarGen = max(isset($decodedData[0]['Solar Fixed (kW)']) ? $decodedData[0]['Solar Fixed (kW)'] : 'N/A', 0);
+
+//CO2 Reduction Calc
+$batteryP = null;
+if ($batteryPower > 0) {
+    $batteryP = (float)$batteryPower * 1.81; //81% efficiency when discharging
+} elseif ($batteryPow < 0) {
+    $batteryP = (float)$batteryPower * 1.19; //19% losses when charging
+}
+$totalPower = $solarGenNegative + $windGen + $hydroGen + $batteryP;
+// Total Power keeps evaluating to a string
+// $totalPower = $solarGenNegative; // FIXME:
+$COR = (float)$totalPower * 1.738;
+
+
+// Access the required values from API
+$power = isset($data[0]['power']) ? $data[0]['power'] : 'N/A';
+$energy = isset($data[0]['energy']) ? $data[0]['energy'] : 'N/A';
+$wind = isset($data[0]['wind_speed']) ? $data[0]['wind_speed'] : 'N/A';
+/*$yaw_delta = isset($data[0]['yaw_delta']) ? $data[0]['yaw_delta'] : 'N/A';*/
+/*$yaw_position = isset($data[0]['yaw_position']) ? $data[0]['yaw_position'] : 'N/A';*/
+
+// Extracting date and time components
+$dateTimeString = $data[0]['timestamp'];
+$year = (int)substr($dateTimeString, 0, 4);
+$month = (int)substr($dateTimeString, 5, 2);
+$day = (int)substr($dateTimeString, 8, 2);
+$hour = (int)substr($dateTimeString, 11, 2);
+$minute = (int)substr($dateTimeString, 14, 2);
+
+// Create a DateTime object
+$time = new DateTime("{$year}-{$month}-{$day} {$hour}:{$minute}:00", new DateTimeZone("UTC"));
+$timeOnline = new DateTime("2024-02-14 13:01:00", new DateTimeZone("UTC"));
+
+// Calculate time since
+$timeSince = ($time->getTimestamp() - $timeOnline->getTimestamp()) / 3600; // Convert seconds to hours
+
+// Calculate lcf
+$lcf = $energy / ($timeSince * 90) * 100; //Life Time Capacity Factor
+
+// Informative boxes
+// Output the NPS data
+echo '<div id="gridItem4" class="grid-item">Reduction in CO2: <span class="value">' . htmlspecialchars(round($COR, 2)) . ' lbs/Hr</span></div>';
+
+// Output the JSON data
+echo '<div id="gridItem1" class="grid-item">Wind Turbine Power: <span class="value">' . htmlspecialchars(round($windGen, 2)) . ' kW</span></div>';
+echo '<div id="gridItem19" class="grid-item">Total Solar Power: <span class="value">' . htmlspecialchars(round($solarGen, 2)) . ' kW</span></div>';
+echo '<div id="gridItem24" class="grid-item">Fixed Solar Power: <span class="value">' . htmlspecialchars(round($fixedSolarGen, 2)) . ' kW</span></div>';
+echo '<div id="gridItem25" class="grid-item">360&deg; Tracking Solar Power: <span class="value">' . htmlspecialchars(round($multiAxisSolarGen, 2)) . ' kW</span></div>';
+echo '<div id="gridItem20" class="grid-item">Hydro Power: <span class="value">' . htmlspecialchars(round($hydroGen, 2)) . ' kW</span></div>';
+echo '<div id="gridItem21" class="grid-item">Dix1 Power: <span class="value">' . htmlspecialchars(round($dix1, 2)) . ' MW</span></div>';
+echo '<div id="gridItem22" class="grid-item">Dix2 Power: <span class="value">' . htmlspecialchars(round($dix2, 2)) . ' MW</span></div>';
+echo '<div id="gridItem23" class="grid-item">Dix3 Power: <span class="value">' . htmlspecialchars(round($dix3, 2)) . ' MW</span></div>';
+echo '<div id="gridItem15" class="grid-item">Battery Power: <span class= "value">' . htmlspecialchars($batteryPow) . ' KW</span></div>';
+echo '<div id="gridItem16" class="grid-item">Battery Power Available: <span class= "value">' . htmlspecialchars($batteryPowAva) . ' KW</span></div>';
+
+// Output the NPS data
+echo '<div id="gridItem2" class="grid-item">Wind Speed: <span class="value">' . htmlspecialchars(round($wind, 2)) . ' m/s</span></div>';
+echo '<div id="gridItem3" class="grid-item">Wind Generated Energy: <span class="value">' . htmlspecialchars(round($energy / 1000, 2)) . ' MWh</span></div>';
+// echo '<div id="gridItem4" class="grid-item">Yaw Error: <span class="value">' . htmlspecialchars(round($yaw_delta,2)) . ' °/s</span></div>';
+// echo '<div id="gridItem5" class="grid-item">Yaw Position: <span class="value">' . htmlspecialchars($yaw_position) . ' °</span></div>';
+echo '<div id="gridItem5" class="grid-item">Wind Lifetime Capacity Factor: <span class="value">' . htmlspecialchars(round($lcf, 2)) . ' %</span></div>';
+// Table for additional information from JSON
+echo '<div id="gridItem6" class="grid-item">Battery Container 1 Temp: <span class="value">' . htmlspecialchars($BatteryContainerTemp1) . '°C</span></div>';
+echo '<div id="gridItem7" class="grid-item">Battery Container 2 Temp: <span class="value">' . htmlspecialchars($BatteryContainerTemp2) . '°C</span></div>';
+echo '<div id="gridItem8" class="grid-item">Solar Irradiance: <span class="value">' . htmlspecialchars(round($solarIrradiance, 2)) . ' W/m²</span></div>';
+echo '<div id="gridItem9" class="grid-item">Battery State of Health:  <span class= "value">' . htmlspecialchars($SOH) . '%</span></div>';
+echo '<div id="gridItem10" class="grid-item">Battery DC Voltage: <span class= "value">' . htmlspecialchars($batterVolt) . ' V</span></div>';
+echo '<div id="gridItem11" class="grid-item">Battery DC Current: <span class= "value">' . htmlspecialchars($batteryCurr) . ' A</span></div>';
+echo '<div id="gridItem12" class="grid-item">Battery Average Cell Voltage: <span class= "value">' . htmlspecialchars($aveCellVolt) . ' V</span></div>';
+echo '<div id="gridItem13" class="grid-item">Battery Cell Voltage: Max: <span class= "value">'. htmlspecialchars($maxCellVolt) . ' V&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Min: '. htmlspecialchars($minCellVolt) . ' V</span></div>';
+
+
+echo '<div id="gridItem14" class="grid-item">Exterior Temperature: <span class= "value">' . htmlspecialchars($ambTemp) . '°C</span></div>';
+echo '<div id="gridItem17" class="grid-item">Maximum Module Temperature: <span class= "value">' . htmlspecialchars($maxModuleTemp) . '°C</span></div>';
+echo '<div id="gridItem18" class="grid-item">Minimum Module Temperature: <span class= "value">' . htmlspecialchars($minModuleTemp) . '°C</span></div>';
+?>
+            </div>
+        </li>
+
+    </ul>
+    </div>
+</div>
+
+<!-- Time Series Plot Container -->
+<div class="chart-container" id = "master">
+    <div class="chart-section">
+        <div id="chartContainer">
+            <div class="dateRangeSelector">
+                <label for="datePicker">Select Date Range: </label>
+                <input type="text" id="datePicker" placeholder="Select date range" readonly>
+                <button id="updateChart">Update Chart</button>
+                <div id="spinner"></div>
+                <div id="spinner_text"> This may take a moment...</div>
+            </div>
+            <div id="timeSeriesContainer"> </div>
+        </div>
+    </div>
+</div> <!-- chart-container -->
+
+</div> <!-- dashboard-container -->
+</div> <!-- dashboard -->
+
+<!--Add text below boxes -->
+    <div class="boxT">
+        <h3>
+        PPL R&D's Renewable Integration Research Facility combines actual 30 megawatts hydroelectric, 10.2 megawatts of solar
+        (fixed, multi-axis tracking, and single-axis tracking), lithium-ion batteries, and wind generation data to show how
+        the complementarity of multiple types of renewable energy, including solar, wind, and hydro, can be combined with energy
+        storage to provide 100% renewable, more-reliable, and cost-effective renewable electricity to customers.
+        Data are not simulated. Raw data are being collected from sensors at the site and automatically live-streamed to the
+        public every few seconds without review or modification.
+        </h3>
+    </div>
+    <div class="boxT">
+        <h3>
+            &copy;<?php echo date('Y')?> PPL Corporation. All rights reserved.
+            Data provided for informational purposes only and is subject to delay, suspension, update or change,
+            without notice. Not for formal or operational use. PPL corporation, PPL R&D, or PPL subsidiaries,
+            are not liable for any errors or delays in content or for any actions taken in reliance on any data.
+        </h3>
+    </div>
+</body>
+</html>
