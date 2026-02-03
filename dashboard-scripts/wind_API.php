@@ -22,17 +22,11 @@ function fetchAPI()
     $response = curl_exec($ch);
 
     // Check for errors
-    if (curl_errno($ch)) {
-       echo json_encode(['error' => curl_error($ch)]);
-        curl_close($ch);
-        exit;
+    if ($response === false) {
+        return ['error' => curl_error($ch)];
     }
-
-    // Close the cURL session
-    curl_close($ch);
-
+    
     // Decode the JSON response
-
     return json_decode($response, true);
 }
 $data = fetchAPI();
