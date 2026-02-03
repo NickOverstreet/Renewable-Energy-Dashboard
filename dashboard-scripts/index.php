@@ -71,6 +71,9 @@
 
     // Decode the JSON data
     $decodedData = json_decode($jsonData, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        //die("Error: Failed to Decode JSON...");
+    }
 
    //Fetch wind data from API
     $url = $config['url'];
@@ -89,14 +92,10 @@
     $response = curl_exec($ch);
 
     // Check for errors
-    if (curl_errno($ch)) {
+    if ($response === false) {
         echo 'Curl error: ' . curl_error($ch);
-        curl_close($ch);
         exit;
     }
-
-    // Close the cURL session
-    curl_close($ch);
 
     // Decode the JSON response and get the needed data to use it later
     $data = json_decode($response, true);
