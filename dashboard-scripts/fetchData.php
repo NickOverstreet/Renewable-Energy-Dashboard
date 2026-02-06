@@ -41,7 +41,7 @@ try {
     $startDateTime = new DateTime($startDate);
     $endDateTime = new DateTime($endDate);
     $interval = $startDateTime->diff($endDateTime);
-    $groupInterval = 60;  //Data shown for all 60 sec of a minute
+    $groupInterval = 300;  //Data shown for all 60 sec of a minute
     /*// Check if the interval is exactly one day
     if ($interval->days >= 0 && $interval->days < 3) {
     // Use 1-minute intervals for a single day
@@ -56,9 +56,11 @@ try {
     }*/
 
     //Change table name "renewable_data" after 'FROM' based on your table name
-$stmt = $pdo->prepare("
+    $stmt = $pdo->prepare("
         SELECT
-            DATE_FORMAT(DATE_SUB(date_time, INTERVAL FLOOR(SECOND(date_time) / :interval) * :interval SECOND), '%Y-%m-%d %H:%i:%s') AS interval_time,
+            FROM_UNIXTIME(
+                FLOOR(UNIX_TIMESTAMP(date_time) / :interval) * :interval
+            ) AS interval_time,
             solar_percentage,
             wind_percentage,
             hydro_percentage,
