@@ -56,7 +56,7 @@ try {
     }*/
 
     //Change table name "renewable_data" after 'FROM' based on your table name
-$stmt = $pdo->prepare("
+    $stmt = $pdo->prepare("
         SELECT
             DATE_FORMAT(DATE_SUB(date_time, INTERVAL FLOOR(SECOND(date_time) / :interval) * :interval SECOND), '%Y-%m-%d %H:%i:%s') AS interval_time,
             solar_percentage,
