@@ -53,7 +53,7 @@
         <div class="container">
                 <div id="chartContainer">
                     <div class="dateRangeSelector">
-                        <label for="datePicker">Select Date Range:</label>
+                        <label for="datePicker" class="date-label">Select Date Range:</label>
                         <input type="text" id="datePicker" placeholder="Select date range" readonly>
                         <button id="updateChart">Update Chart</button>
                     </div>
