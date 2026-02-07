@@ -14,6 +14,8 @@ let latestRealTimeData = {
     wind: null,
     hydro: null,
     battery: null,
+    solarFixed: null, // Added Solar Fixed latest real-time
+    solar360: null, // Added Solar Tracking latest real-time
     timestamp: null
 };
 
@@ -47,11 +49,15 @@ function updateTimeSeriesChart(fetchedData) {
         const windData = fetchedData.wind.map((val, i) => [timestamps[i], val]);
         const hydroData = fetchedData.hydro.map((val, i) => [timestamps[i], val]);
         const batteryData = fetchedData.battery.map((val, i) => [timestamps[i], val]);
+        const solarFixedData = fetchedData.solarFixed.map((val, i) => [timestamps[i], val]);
+        const solar360Data = fetchedData.solar360.map((val, i) => [timestamps[i], val]);
 
         chart.series[0].setData(solarData, false);
         chart.series[1].setData(windData, false);
         chart.series[2].setData(hydroData, false);
         chart.series[3].setData(batteryData, false);
+        chart.series[4].setData(solarFixedData, false);
+        chart.series[5].setData(solar360Data, false);
 
        /* chart.xAxis[0].setCategories(fetchedData.interval_times, false);*/
         chart.redraw();
@@ -85,11 +91,13 @@ function checkIfTodaySelected(endDate) {
 function addRealTimeDataToChart() {
    const chart = Highcharts.charts.find(c => c.renderTo.id === 'timeSeriesContainer');
     if (chart) {
-        const { timestamp, solar, wind, hydro, battery } = latestRealTimeData;
+        const { timestamp, solar, wind, hydro, battery, solarFixed, solar360 } = latestRealTimeData;
         chart.series[0].addPoint([timestamp, solar], true, false);
         chart.series[1].addPoint([timestamp, wind], true, false);
         chart.series[2].addPoint([timestamp, hydro], true, false);
         chart.series[3].addPoint([timestamp, battery], true, false);
+        chart.series[4].addPoint([timestamp, solarFixed], true, false);
+        chart.series[5].addPoint([timestamp, solar360], true, false);
     }
 }
 
@@ -303,6 +311,14 @@ function createTimeSeriesChart() {
             name: 'Battery',
             data: [],
             color: '#24d63b'
+        }, {
+            name: 'Solar Fixed',
+            data: [],
+            color: '#17ada1'
+        }, {
+            name: 'Solar Tracking',
+            data: [],
+            color: '#d11717'
         }]
     });
 }
