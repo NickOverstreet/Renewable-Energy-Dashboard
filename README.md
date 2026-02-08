@@ -141,7 +141,7 @@ Located under dashboard-scripts.
 
 - Set dbname to "renewables"
 
-5\. **Edit conofig.py** (Python config)\*\*
+5\. **Edit config.py** (Python config)\*\*
 
 Located under python-db-scripts.
 
