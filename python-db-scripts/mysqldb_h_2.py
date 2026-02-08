@@ -50,6 +50,10 @@ def fetch_data():
     """Fetch data from the JSON URL."""
     try:
         response = requests.get(json_url)
+        """ print("URL:", response.url)
+        print("STATUS:", response.status_code)
+        print("CONTENT-TYPE:", response.headers.get("Content-Type"))
+        print("BODY (first 300):", response.text[:300]) """ # Debugging output
         response.raise_for_status()  # HTTPError for bad responses
         data = response.json()
         return data
