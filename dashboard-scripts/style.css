@@ -2,10 +2,10 @@
 
 /*media query for smaller screens*/
 @media (max-width: 360px) {
-    .box {
-        flex: 1 1 100%; /* Adjust width for smaller screens */
-        max-width: 100%; /* Remove max-width for smaller screens */
-    }
+  .box {
+    flex: 1 1 100%; /* Adjust width for smaller screens */
+    max-width: 100%; /* Remove max-width for smaller screens */
+  }
 }
 
 
@@ -61,11 +61,11 @@
 }
 
 #timeSeriesContainer {
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    margin: auto;
-    display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  margin: auto;
+  display: block;
 }
 
 /* Container for both date range selector and time series chart */
@@ -83,10 +83,10 @@
 }
 
 .dateRangeSelector {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px; /* Space between date range selector and chart */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px; /* Space between date range selector and chart */
 }
 
 .date-label { /* Style for "Select Data Range" */
@@ -97,32 +97,46 @@
 }
 
 .dateRangeSelector label.start-date {
-    margin-right: 30px;
+  margin-right: 30px;
 }
 .dateRangeSelector label.end-date {
-    margin-left: 20px; /* Add space between "End Date" label and input box */
+  margin-left: 20px; /* Add space between "End Date" label and input box */
 }
 .dateRangeSelector input[type="date"] {
-    margin-right: 15px; /* Add space between the end date input and the update button */
+  margin-right: 15px; /* Add space between the end date input and the update button */
 }
 #updateChart {
-    margin-left: 10px;
-    padding: 5px 10px;
+  margin-left: 10px;
+  padding: 5px 10px;
 }
+
+/* styling for last updated container / label (JSON data) */
+
+.lastUpdatedContainer {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.lastUpdatedLabel {
+  font-weight: bold;
+  margin-right: 6px;
+}
+
+/* end of styling for last updated container / label (JSON data) */
 
 svg {
-    width: 100%;
-    height: auto;
-    max-width: 100%;
-    vertical-align: middle;
-    margin: auto;
-    display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  vertical-align: middle;
+  margin: auto;
+  display: block;
 }
 
-body{
-    overflow: auto;
-    margin: 0;
-    padding: 0;
+body {
+  overflow: auto;
+  margin: 0;
+  padding: 0;
 }
 
 h1{ /* Header Style */

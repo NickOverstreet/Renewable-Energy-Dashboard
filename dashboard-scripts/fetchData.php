@@ -56,7 +56,7 @@ try {
     }*/
 
     //Change table name "renewable_data" after 'FROM' based on your table name
-$stmt = $pdo->prepare("
+    $stmt = $pdo->prepare("
         SELECT
             FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(date_time) / :interval) * :interval) AS interval_time,
             solar_percentage,
