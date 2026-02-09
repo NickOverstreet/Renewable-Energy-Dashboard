@@ -17,4 +17,3 @@ dashboard-old-scripts/config/API/ConfigAPI.php
 
 # Visual Studio / VS Code workspace files
 .vs/
-.venv/

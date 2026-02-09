@@ -15,6 +15,7 @@
     <script src="timeSeries.js" defer ></script>
     <script src="wind_API.php" defer ></script>
     <script src="Wind_API.js" defer ></script>
+    <script src="rollingCapacityFactors.js" defer ></script>
     <script src="https://code.highcharts.com/stock/highstock.js"></script>
     <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
@@ -47,7 +48,6 @@
             <h2>Battery</h2>
         </div>
     </div>
-
 
    <!-- Time Series Plot Container -->
         <div class="container">
@@ -206,6 +206,11 @@
     echo '<div id="gridItem14" class="grid-item">Exterior Temperature: <br><span class= "value">' . htmlspecialchars($ambTemp) . '°C</span></div>';
     echo '<div id="gridItem17" class="grid-item">Maximum Module Temperature: <br><span class= "value">' . htmlspecialchars($maxModuleTemp) . '°C</span></div>';
     echo '<div id="gridItem18" class="grid-item">Minimum Module Temperature: <br><span class= "value">' . htmlspecialchars($minModuleTemp) . '°C</span></div>';
+    
+    // 7-Day Rolling Capacity Factors
+    echo '<div id="gridItem26" class="grid-item">Solar 7-Day Capacity Factor: <br><span id="solarCF7d" class="value">--%</span></div>';
+    echo '<div id="gridItem27" class="grid-item">Hydro 7-Day Capacity Factor: <br><span id="hydroCF7d" class="value">--%</span></div>';
+
 
      echo '</div>';
 ?>
