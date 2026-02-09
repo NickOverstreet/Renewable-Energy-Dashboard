@@ -7,6 +7,9 @@ python-db-scripts/config.py
 # python pycache files
 python-db-scripts/__pycache__
 
+# python db test logs
+python-db-scripts/red_test.log
+
 # dashboard script config files
 dashboard-scripts/config/DB/dbConfig.php
 dashboard-scripts/config/API/ConfigAPI.php

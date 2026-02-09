@@ -8,56 +8,59 @@
   }
 }
 
-
-.container { /* Container box behind guages and graph */
-    display: flex;
-    justify-content: space-evenly;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    padding: 10px;
-    width: 100%;
-    box-sizing: border-box;
-    flex-grow: 1;
-    overflow: auto;
-    position:relative;
-    top: 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* add shadow to the container */
-    border: 2px solid #ccc; /* add border to the container */
-    border-radius: 12px; /* add rounded corners to the border */
-    background: #ededed;
+.container {
+  /* Container box behind guages and graph */
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  padding: 20px;
+  width: 98%;
+  margin: 0 auto;
+  margin-top: 12px;
+  box-sizing: border-box;
+  flex-grow: 1;
+  overflow: auto;
+  position: relative;
+  top: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* add shadow to the container */
+  border: 2px solid #ccc; /* add border to the container */
+  border-radius: 12px; /* add rounded corners to the border */
+  background: #ededed;
 }
 
-
-.box { /* Container behind the guages */
-    flex: 1 1 calc(50% - 20px); /* adjust the width of each box as needed */
-    margin: 10px;
-    text-align: center;
-    min-width: 200px;
-    max-width: 300px; /* set a maximum width to prevent excessive stretching */
-    width: calc(50% - 20px); /* adjust the width for different screen sizes */
-    padding-bottom: 20px;
-    height: auto;
-    background: transparent;
-
+.box {
+  /* Container behind the guages */
+  flex: 1 1 calc(50% - 20px); /* adjust the width of each box as needed */
+  margin: 10px;
+  text-align: center;
+  min-width: 200px;
+  max-width: 300px; /* set a maximum width to prevent excessive stretching */
+  width: calc(50% - 20px); /* adjust the width for different screen sizes */
+  padding-bottom: 20px;
+  height: auto;
+  background: transparent;
 }
 
-.boxT { /* Text box at bottom of dahboard */
-    display: flex;
-    justify-content: space-evenly;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    padding: 10px;
-    width: 100%;
-    box-sizing: border-box;
-    flex-grow: 1;
-    overflow: auto;
-    position:relative;
-    top: 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow to the container */
-    border: 2px solid #ccc; /* Add border to the container */
-    border-radius: 12px;
-    margin-bottom: 15px;
-    background: #007ab8;
+.boxT {
+  /* Text box at bottom of dahboard */
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  padding: 10px;
+  width: 98%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  flex-grow: 1;
+  overflow: auto;
+  position: relative;
+  top: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow to the container */
+  border: 2px solid #ccc; /* Add border to the container */
+  border-radius: 12px;
+  margin-bottom: 15px;
+  background: #007ab8;
 }
 
 #timeSeriesContainer {
@@ -70,16 +73,16 @@
 
 /* Container for both date range selector and time series chart */
 #chartContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 99%;
-    height: 100%;
-    max-width: 100%;
-    margin: auto;
-    position: relative;
-    background-color: #ededed;
-    padding: 20px; /* Add padding for spacing */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 99%;
+  height: 100%;
+  max-width: 100%;
+  margin: auto;
+  position: relative;
+  background-color: #ededed;
+  padding: 20px; /* Add padding for spacing */
 }
 
 .dateRangeSelector {
@@ -89,11 +92,14 @@
   margin-bottom: 20px; /* Space between date range selector and chart */
 }
 
-.date-label { /* Style for "Select Data Range" */
-    font-family: "Roboto", Arial, sans-serif; /* Change Font */
-    font-weight: 300; /* Change boldness */
-    font-size: 14px; /* Change size */
-    color: #2d2926;
+.date-label {
+  /* Style for "Select Data Range" */
+  font-family: "Roboto", Arial, sans-serif; /* Change Font */
+  font-weight: 300; /* Change boldness */
+  font-size: 14px; /* Change size */
+  margin-right: 6px;
+  font-weight: bold;
+  color: #2d2926;
 }
 
 .dateRangeSelector label.start-date {
@@ -108,13 +114,18 @@
 #updateChart {
   margin-left: 10px;
   padding: 5px 10px;
+  cursor: pointer;
+}
+
+#updateChart:disabled {
+  cursor: default;
 }
 
 /* styling for last updated container / label (JSON data) */
 
 .lastUpdatedContainer {
   text-align: center;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .lastUpdatedLabel {
@@ -139,76 +150,82 @@ body {
   padding: 0;
 }
 
-h1{ /* Header Style */
-    font-family: "Raleway OTF", "Raleway", Arial, sans-serif; /* Change font family */
-    font-weight: 600; /* Change the boldness */
-    font-size: 21px; /* Change font size */
-    color: #001489; /* Change text color */
-    margin-bottom: 15px; /* Space below the heading */
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-    text-align: center;
+h1 {
+  /* Header Style */
+  font-family:
+    "Raleway OTF", "Raleway", Arial, sans-serif; /* Change font family */
+  font-weight: 600; /* Change the boldness */
+  font-size: 21px; /* Change font size */
+  color: #001489; /* Change text color */
+  margin-bottom: 15px; /* Space below the heading */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
-h2{ /* Style for dial's labels */
-    font-family: "Roboto", Arial, sans-serif; /* Change font family */
-    font-weight: 500; /* Change boldness */
-    font-size: 20px; /* Change font size */
-    color: #007ab8; /* Change text color */
-    margin-bottom: 10px; /* Space below the heading */
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+h2 {
+  /* Style for dial's labels */
+  font-family: "Roboto", Arial, sans-serif; /* Change font family */
+  font-weight: 500; /* Change boldness */
+  font-size: 20px; /* Change font size */
+  color: #007ab8; /* Change text color */
+  margin-bottom: 10px; /* Space below the heading */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-h3{
-    font-family: "Roboto", Arial, sans-serif; /* Change font family */
-    font-size: 16px; /* Change font size */
-    color:#ffffff; /* Change text color */
-    margin-left: 20px;
-    margin-right: 20px;
-    margin-bottom: 20px; /* Space below the heading */
-    text-align: justify;
+h3 {
+  font-family: "Roboto", Arial, sans-serif; /* Change font family */
+  font-size: 16px; /* Change font size */
+  color: #ffffff; /* Change text color */
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 20px; /* Space below the heading */
+  text-align: justify;
 }
 
-h4{
-    font-family: "Roboto", Arial, sans-serif; /* Change font family */
-    font-size: 40px; /* Change font size */
-    color: #ffffff; /* Change text color */
-    margin-bottom: 10px; /* Space below the heading */
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
-    text-align: center;
-    margin-top: 10px;
+h4 {
+  font-family: "Roboto", Arial, sans-serif; /* Change font family */
+  font-size: 40px; /* Change font size */
+  color: #ffffff; /* Change text color */
+  margin-bottom: 10px; /* Space below the heading */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  margin-top: 10px;
 }
 
 .grid-auto {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Dynamic columns based on available space */
-    gap: 15px; /* Adds spacing between boxes */
-    padding: 20px; /* Adds padding around the container */
-    background-color: #ffffff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin: 20px auto;
-    }
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(250px, 1fr)
+  ); /* Dynamic columns based on available space */
+  gap: 15px; /* Adds spacing between boxes */
+  padding: 20px; /* Adds padding around the container */
+  background-color: #ededed;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+}
 .grid-item {
-    background-color: #007ab8; 
-    border: 1px solid #ddd; /* Thin border */
-    border-radius: 12px; /* Rounded corners */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    padding: 15px; /* Inner padding for content */
-    text-align: center; /* Center-align text */
-    font-family: "Roboto", Arial, sans-serif; /* Set font */
-    font-weight: 300; /* Change boldness */
-    box-sizing: border-box; /* Include padding in width/height */
-    color: #ffffff; /*text color*/
+  background-color: #007ab8;
+  border: 1px solid #ddd; /* Thin border */
+  border-radius: 12px; /* Rounded corners */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  padding: 15px; /* Inner padding for content */
+  text-align: center; /* Center-align text */
+  font-family: "Roboto", Arial, sans-serif; /* Set font */
+  font-weight: 300; /* Change boldness */
+  box-sizing: border-box; /* Include padding in width/height */
+  color: #ffffff; /*text color*/
 }
 
 .grid-item .value {
-    font-weight: bold;
-    color: #ffffff;
-    font-size: 18px;
+  font-weight: bold;
+  color: #ffffff;
+  font-size: 18px;
 }
-.value{
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: bold;
+.value {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 /* Style for the 3x3 block */
