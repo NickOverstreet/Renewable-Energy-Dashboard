@@ -57,19 +57,20 @@ try {
 
     //Change table name "renewable_data" after 'FROM' based on your table name
     $stmt = $pdo->prepare("
-        SELECT
-            FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(date_time) / :interval) * :interval) AS interval_time,
-            solar_percentage,
-            wind_percentage,
-            hydro_percentage,
-            battery_percentage,
-            solar_fixed_percentage,
-            solar_360_percentage
-        FROM historical_data
-        WHERE date_time BETWEEN :startDate AND :endDate
-        GROUP BY interval_time
-        ORDER BY interval_time ASC
-    ");
+    SELECT
+        DATE_FORMAT(
+            DATE_SUB(date_time, INTERVAL MOD(UNIX_TIMESTAMP(date_time), :interval) SECOND),
+            '%Y-%m-%d %H:%i:%s'
+        ) AS interval_time,
+        AVG(solar_percentage)   AS solar_percentage,
+        AVG(wind_percentage)    AS wind_percentage,
+        AVG(hydro_percentage)   AS hydro_percentage,
+        AVG(battery_percentage) AS battery_percentage
+    FROM historical_data
+    WHERE date_time BETWEEN :startDate AND :endDate
+    GROUP BY interval_time
+    ORDER BY interval_time ASC
+");
 
     $stmt->bindValue(':interval', $groupInterval, PDO::PARAM_INT);
     $stmt->bindParam(':startDate', $startDateUTC);
