@@ -4,6 +4,9 @@
 # python db script config file
 python-db-scripts/config.py
 
+# python pycache files
+python-db-scripts/__pycache__
+
 # dashboard script config files
 dashboard-scripts/config/DB/dbConfig.php
 dashboard-scripts/config/API/ConfigAPI.php
@@ -14,6 +17,3 @@ dashboard-old-scripts/config/API/ConfigAPI.php
 
 # Visual Studio / VS Code workspace files
 .vs/
-
-# macOS
-.DS_Store

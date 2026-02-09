@@ -2,14 +2,14 @@
 
 /*media query for smaller screens*/
 @media (max-width: 360px) {
-    .box {
-        flex: 1 1 100%; /* Adjust width for smaller screens */
-        max-width: 100%; /* Remove max-width for smaller screens */
-    }
+  .box {
+    flex: 1 1 100%; /* Adjust width for smaller screens */
+    max-width: 100%; /* Remove max-width for smaller screens */
+  }
 }
 
 
-.container {
+.container { /* Container box behind guages and graph */
     display: flex;
     justify-content: space-evenly;
     flex-wrap: wrap;
@@ -24,11 +24,11 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* add shadow to the container */
     border: 2px solid #ccc; /* add border to the container */
     border-radius: 12px; /* add rounded corners to the border */
-    background: #10344B;
+    background: #ededed;
 }
 
 
-.box {
+.box { /* Container behind the guages */
     flex: 1 1 calc(50% - 20px); /* adjust the width of each box as needed */
     margin: 10px;
     text-align: center;
@@ -41,7 +41,7 @@
 
 }
 
-.boxT {
+.boxT { /* Text box at bottom of dahboard */
     display: flex;
     justify-content: space-evenly;
     flex-wrap: wrap;
@@ -57,15 +57,15 @@
     border: 2px solid #ccc; /* Add border to the container */
     border-radius: 12px;
     margin-bottom: 15px;
-    background: #10344B;
+    background: #007ab8;
 }
 
 #timeSeriesContainer {
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    margin: auto;
-    display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  margin: auto;
+  display: block;
 }
 
 /* Container for both date range selector and time series chart */
@@ -78,67 +78,90 @@
     max-width: 100%;
     margin: auto;
     position: relative;
-    background-color: white; /* Set background color to white */
+    background-color: #ededed;
     padding: 20px; /* Add padding for spacing */
 }
 
 .dateRangeSelector {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px; /* Space between date range selector and chart */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px; /* Space between date range selector and chart */
+}
+
+.date-label { /* Style for "Select Data Range" */
+    font-family: "Roboto", Arial, sans-serif; /* Change Font */
+    font-weight: 300; /* Change boldness */
+    font-size: 14px; /* Change size */
+    color: #2d2926;
 }
 
 .dateRangeSelector label.start-date {
-    margin-right: 30px;
+  margin-right: 30px;
 }
 .dateRangeSelector label.end-date {
-    margin-left: 20px; /* Add space between "End Date" label and input box */
+  margin-left: 20px; /* Add space between "End Date" label and input box */
 }
 .dateRangeSelector input[type="date"] {
-    margin-right: 15px; /* Add space between the end date input and the update button */
+  margin-right: 15px; /* Add space between the end date input and the update button */
 }
 #updateChart {
-    margin-left: 10px;
-    padding: 5px 10px;
+  margin-left: 10px;
+  padding: 5px 10px;
 }
+
+/* styling for last updated container / label (JSON data) */
+
+.lastUpdatedContainer {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.lastUpdatedLabel {
+  font-weight: bold;
+  margin-right: 6px;
+}
+
+/* end of styling for last updated container / label (JSON data) */
 
 svg {
-    width: 100%;
-    height: auto;
-    max-width: 100%;
-    vertical-align: middle;
-    margin: auto;
-    display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  vertical-align: middle;
+  margin: auto;
+  display: block;
 }
 
-body{
-    overflow: auto;
-    margin: 0;
-    padding: 0;
+body {
+  overflow: auto;
+  margin: 0;
+  padding: 0;
 }
 
-h1{
-    font-family: "Times New Roman", sans-serif; /* Change font family */
+h1{ /* Header Style */
+    font-family: "Raleway OTF", "Raleway", Arial, sans-serif; /* Change font family */
+    font-weight: 600; /* Change the boldness */
     font-size: 21px; /* Change font size */
-    color: #298fc2; /* Change text color */
+    color: #001489; /* Change text color */
     margin-bottom: 15px; /* Space below the heading */
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
 
-h2{
-    font-family: "Times New Roman", sans-serif; /* Change font family */
+h2{ /* Style for dial's labels */
+    font-family: "Roboto", Arial, sans-serif; /* Change font family */
+    font-weight: 500; /* Change boldness */
     font-size: 20px; /* Change font size */
-    color: #F3F5F6; /* Change text color */
+    color: #007ab8; /* Change text color */
     margin-bottom: 10px; /* Space below the heading */
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 h3{
-    font-family: "Times New Roman", sans-serif; /* Change font family */
+    font-family: "Roboto", Arial, sans-serif; /* Change font family */
     font-size: 16px; /* Change font size */
-    color:#F3F5F6; /* Change text color */
+    color:#ffffff; /* Change text color */
     margin-left: 20px;
     margin-right: 20px;
     margin-bottom: 20px; /* Space below the heading */
@@ -146,9 +169,9 @@ h3{
 }
 
 h4{
-    font-family: "Times New Roman", sans-serif; /* Change font family */
+    font-family: "Roboto", Arial, sans-serif; /* Change font family */
     font-size: 40px; /* Change font size */
-    color: #F3F5F6; /* Change text color */
+    color: #ffffff; /* Change text color */
     margin-bottom: 10px; /* Space below the heading */
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
     text-align: center;
@@ -160,29 +183,30 @@ h4{
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Dynamic columns based on available space */
     gap: 15px; /* Adds spacing between boxes */
     padding: 20px; /* Adds padding around the container */
-    background-color: #f5f5f5;
+    background-color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     margin: 20px auto;
     }
 .grid-item {
-    background-color: #10344B; /* Light gray background */
+    background-color: #007ab8; 
     border: 1px solid #ddd; /* Thin border */
     border-radius: 12px; /* Rounded corners */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
     padding: 15px; /* Inner padding for content */
     text-align: center; /* Center-align text */
-    font-family: "Times New Roman", sans-serif; /* Set font */
+    font-family: "Roboto", Arial, sans-serif; /* Set font */
+    font-weight: 300; /* Change boldness */
     box-sizing: border-box; /* Include padding in width/height */
-    color: #F3F5F6; /*text color*/
+    color: #ffffff; /*text color*/
 }
 
 .grid-item .value {
     font-weight: bold;
-    color: coral;
+    color: #ffffff;
     font-size: 18px;
 }
 .value{
-    color: coral;
+    color: #ffffff;
     font-size: 18px;
     font-weight: bold;
 }

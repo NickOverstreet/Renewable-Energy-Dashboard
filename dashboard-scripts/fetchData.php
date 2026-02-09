@@ -41,7 +41,7 @@ try {
     $startDateTime = new DateTime($startDate);
     $endDateTime = new DateTime($endDate);
     $interval = $startDateTime->diff($endDateTime);
-    $groupInterval = 60;  //Data shown for all 60 sec of a minute
+    $groupInterval = 300;  //Data shown for all 60 sec of a minute
     /*// Check if the interval is exactly one day
     if ($interval->days >= 0 && $interval->days < 3) {
     // Use 1-minute intervals for a single day
@@ -93,6 +93,8 @@ $stmt = $pdo->prepare("
         'wind' => [],
         'hydro' => [],
         'battery' => [],
+        'solarFixed' => [],
+        'solar360' => [],
         'interval_times' => []
     ];
 
@@ -114,6 +116,8 @@ $stmt = $pdo->prepare("
         $data['wind'][] = (float)$row['wind_percentage'];
         $data['hydro'][] = (float)$row['hydro_percentage'];
         $data['battery'][] = (float)$row['battery_percentage'];
+        $data['solarFixed'][] = (float)$row['solar_fixed_percentage'];
+        $data['solar360'][] = (float)$row['solar_360_percentage'];
     }
 
     echo json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

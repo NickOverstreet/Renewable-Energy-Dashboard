@@ -53,7 +53,7 @@
         <div class="container">
                 <div id="chartContainer">
                     <div class="dateRangeSelector">
-                        <label for="datePicker">Select Date Range:</label>
+                        <label for="datePicker" class="date-label">Select Date Range:</label>
                         <input type="text" id="datePicker" placeholder="Select date range" readonly>
                         <button id="updateChart">Update Chart</button>
                     </div>
@@ -99,6 +99,7 @@
 
     // Decode the JSON response and get the needed data to use it later
     $data = json_decode($response, true);
+    $jsonLastUpdatedDate = isset($decodedData[0]['Time']) ? $decodedData[0]['Time'] : '';
     $SOH = isset($decodedData[0]['Battery State of Health (SOH %)']) ? $decodedData[0]['Battery State of Health (SOH %)'] : 'N/A';
     $batterVolt = isset($decodedData[0]['Battery DC Voltage']) ? $decodedData[0]['Battery DC Voltage'] : 'N/A';
     $batteryCurr = isset($decodedData[0]['Battery DC Current']) ? $decodedData[0]['Battery DC Current'] : 'N/A';
@@ -163,6 +164,12 @@
 
     // Calculate lcf
     $lcf = $energy / ($timeSince * 90) * 100; //Life Time Capacity Factor
+
+    // Label to showcase last time the date was updated for JSON data
+    echo '<div class="lastUpdatedContainer">';
+    echo '<span class="lastUpdatedLabel" id="lastUpdatedLabel">Last updated (UTC): </span>';
+    echo '<span id="jsonLastUpdatedValue">' . htmlspecialchars($jsonLastUpdatedDate ?? '-') . '</span>';
+    echo '</div>';
 
     // Informative boxes
     echo '<div class="container grid-auto">';
