@@ -11,22 +11,31 @@ function updateGauges(check) {
       }
       return response.json();
     })
-    .then((data) => {
-      const SolarGen = Math.min(
-        Math.max(data[0]["Solar Generation (%)"].toFixed(1), 0),
-        100,
-      );
-      const WindGen = Math.max(data[0]["Wind Generation (%)"].toFixed(1), 0);
-      const SOC = Math.max(
-        data[0]["Battery State of Charge (SOC %)"].toFixed(1),
-        0,
-      );
-      const HydroGen = Math.max(data[0]["Hydro Generation (%)"].toFixed(1), 0);
-      const GenerationS = Math.max(data[0]["Solar Generation (kW)"], 0); //solar
-      const GenerationSNegative = data[0]["Solar Generation (kW)"]; //solar
-      const GenerationW = Math.max(data[0]["Wind Generation (kW)"], 0); //wind
-      const GenerationH = Math.max(data[0]["Hydro Generation (kW)"], 0); //hydro
-      const GenerationB = data[0]["Battery Power (kW)"]; //battery
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const clamp = (v, min = 0, max = 100) => Math.min(Math.max(Number(v) || 0, min), max); // Utility function to safely convert a value to a number and clamp it between a minimum and maximum range
+
+            const SolarGen = Math.min(Math.max(data[0]['Solar Generation (%)'].toFixed(1), 0), 100);
+            const WindGen = Math.max(data[0]['Wind Generation (%)'].toFixed(1), 0);
+            const SOC = Math.max(data[0]['Battery State of Charge (SOC %)'].toFixed(1), 0);
+            const HydroGen = Math.max(data[0]['Hydro Generation (%)'].toFixed(1), 0);
+            const SolarFixedGen = Math.max(data[0]["Solar Fixed (%)"].toFixed(1), 0);
+
+            // Safely read the "Solar 360 Tracking (%)" value from the API
+            // Optional chaining (?.) prevents errors if the field is missing
+            // If the value is undefined or invalid, it will default to 0
+            const Solar360Gen = clamp(data[0]?.['Solar 360 Tracking (%)']);
+
+            const GenerationS = Math.max(data[0]['Solar Generation (kW)'], 0); //solar
+            const GenerationSNegative = data[0]['Solar Generation (kW)']; //solar
+            const GenerationW = Math.max(data[0]['Wind Generation (kW)'], 0); //wind
+            const GenerationH = Math.max(data[0]['Hydro Generation (kW)'], 0); //hydro
+            const GenerationB = data[0]['Battery Power (kW)']; //battery
 
       // CO2 Reduction Calc
       let batteryPower = null;
@@ -111,20 +120,22 @@ function updateGauges(check) {
       document.getElementById("gridItem25").innerHTML =
         `360&deg; Tracking Solar Power: <span class="value"><br>${data[0]["Solar 360 Trackers (kW)"].toFixed(2)} kW</span>`;
 
-      // Store the real-time data with the current timestamp
-      latestRealTimeData = {
-        solar: SolarGen,
-        wind: WindGen,
-        hydro: HydroGen,
-        battery: SOC,
-        timestamp: estTimestamp,
-      };
-      // If today's date is selected, add the new data point to the chart
-      if (check) {
-        addRealTimeDataToChart();
-      }
-    })
-    .catch((error) => console.error("Error fetching gauge data:", error));
+            // Store the real-time data with the current timestamp
+            latestRealTimeData = {
+                solar: SolarGen,
+                wind: WindGen,
+                hydro: HydroGen,
+                battery: SOC,
+                solarFixed: SolarFixedGen,
+                solar360: Solar360Gen,
+                timestamp: estTimestamp
+            };
+            // If today's date is selected, add the new data point to the chart
+            if (check) {
+                addRealTimeDataToChart();
+            }
+        })
+        .catch(error => console.error('Error fetching gauge data:', error));
 }
 // Set up interval to update gauges every 60 seconds
 setInterval(() => updateGauges(checkIfTodaySelected(endDate)), 1000);

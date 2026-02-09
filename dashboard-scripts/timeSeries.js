@@ -10,11 +10,13 @@ console.log(endDateChecker);
 
 // Global variable to store the latest real-time data fetched
 let latestRealTimeData = {
-  solar: null,
-  wind: null,
-  hydro: null,
-  battery: null,
-  timestamp: null,
+    solar: null,
+    wind: null,
+    hydro: null,
+    battery: null,
+    solarFixed: null, // Added Solar Fixed latest real-time
+    solar360: null, // Added Solar Tracking latest real-time
+    timestamp: null
 };
 
 // Request the data from the server through API
@@ -42,23 +44,24 @@ async function fetchData(startDate, endDate, startTime) {
 function updateTimeSeriesChart(fetchedData) {
   if (!fetchedData) return;
 
-  const chart = Highcharts.charts.find(
-    (c) => c.renderTo.id === "timeSeriesContainer",
-  );
-  if (chart) {
-    // Convert interval_times to Unix timestamps in milliseconds
-    const timestamps = fetchedData.interval_times.map((time) =>
-      new Date(time).getTime(),
-    );
+    const chart = Highcharts.charts.find(c => c.renderTo.id === 'timeSeriesContainer');
+    if (chart) {
+        // Convert interval_times to Unix timestamps in milliseconds
+        const timestamps = fetchedData.interval_times.map(time => new Date(time).getTime());
+        // Map data arrays to the format [timestamp, value]
+        const solarData = fetchedData.solar.map((val, i) => [timestamps[i], val]);
+        const windData = fetchedData.wind.map((val, i) => [timestamps[i], val]);
+        const hydroData = fetchedData.hydro.map((val, i) => [timestamps[i], val]);
+        const batteryData = fetchedData.battery.map((val, i) => [timestamps[i], val]);
+        const solarFixedData = fetchedData.solarFixed.map((val, i) => [timestamps[i], val]);
+        const solar360Data = fetchedData.solar360.map((val, i) => [timestamps[i], val]);
 
-    // Map data arrays to the format [timestamp, value]
-    const solarData = fetchedData.solar.map((val, i) => [timestamps[i], val]);
-    const windData = fetchedData.wind.map((val, i) => [timestamps[i], val]);
-    const hydroData = fetchedData.hydro.map((val, i) => [timestamps[i], val]);
-    const batteryData = fetchedData.battery.map((val, i) => [
-      timestamps[i],
-      val,
-    ]);
+        chart.series[0].setData(solarData, false);
+        chart.series[1].setData(windData, false);
+        chart.series[2].setData(hydroData, false);
+        chart.series[3].setData(batteryData, false);
+        chart.series[4].setData(solarFixedData, false);
+        chart.series[5].setData(solar360Data, false);
 
     chart.series[0].setData(solarData, false);
     chart.series[1].setData(windData, false);
@@ -95,16 +98,16 @@ function checkIfTodaySelected(endDate) {
 }
 
 function addRealTimeDataToChart() {
-  const chart = Highcharts.charts.find(
-    (c) => c.renderTo.id === "timeSeriesContainer",
-  );
-  if (chart) {
-    const { timestamp, solar, wind, hydro, battery } = latestRealTimeData;
-    chart.series[0].addPoint([timestamp, solar], true, false);
-    chart.series[1].addPoint([timestamp, wind], true, false);
-    chart.series[2].addPoint([timestamp, hydro], true, false);
-    chart.series[3].addPoint([timestamp, battery], true, false);
-  }
+   const chart = Highcharts.charts.find(c => c.renderTo.id === 'timeSeriesContainer');
+    if (chart) {
+        const { timestamp, solar, wind, hydro, battery, solarFixed, solar360 } = latestRealTimeData;
+        chart.series[0].addPoint([timestamp, solar], true, false);
+        chart.series[1].addPoint([timestamp, wind], true, false);
+        chart.series[2].addPoint([timestamp, hydro], true, false);
+        chart.series[3].addPoint([timestamp, battery], true, false);
+        chart.series[4].addPoint([timestamp, solarFixed], true, false);
+        chart.series[5].addPoint([timestamp, solar360], true, false);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -296,29 +299,30 @@ function createTimeSeriesChart() {
             "downloadSVG",
           ],
         },
-      },
-    },
-    series: [
-      {
-        name: "Solar",
-        data: [],
-        color: "#fe6a35",
-      },
-      {
-        name: "Wind",
-        data: [],
-        color: "#2caffe",
-      },
-      {
-        name: "Hydro",
-        data: [],
-        color: "navy",
-      },
-      {
-        name: "Battery",
-        data: [],
-        color: "#24d63b",
-      },
-    ],
-  });
+        series: [{
+            name: 'Solar',
+            data: [],
+            color: '#fe6a35'
+        }, {
+            name: 'Wind',
+            data: [],
+            color: '#2caffe'
+        }, {
+            name: 'Hydro',
+            data: [],
+            color: 'navy'
+        }, {
+            name: 'Battery',
+            data: [],
+            color: '#24d63b'
+        }, {
+            name: 'Solar Fixed',
+            data: [],
+            color: '#17ada1'
+        }, {
+            name: 'Solar Tracking',
+            data: [],
+            color: '#d11717'
+        }]
+    });
 }
