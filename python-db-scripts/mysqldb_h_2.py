@@ -18,6 +18,12 @@ logging.basicConfig(
     format="%(asctime)s:%(levelname)s:%(message)s",
 )
 
+# Local logging
+logging.basicConfig(
+    filename="red_test.log",
+    level=logging.INFO,
+    format="%(asctime)s:%(levelname)s:%(message)s",
+)
 
 # Time precision enhancement
 """
@@ -32,7 +38,6 @@ def sleep_until_next_second():
         time.sleep(time_to_sleep)
 
 """
-
 
 # Signal handler to handle termination
 def signal_handler(sig, frame):
@@ -68,7 +73,7 @@ def format_value(value):
     return round(value, 2)
 
 
-def save_to_db(connection, solar, wind, hydro, battery, solar_fixed, solar_360):
+def save_to_db(connection, solar, wind, hydro, battery, solar_fixed, solar_360, solar_generation, hydro_generation):
     """Save the data to the database."""
     try:
         with connection.cursor() as cursor:
@@ -76,14 +81,14 @@ def save_to_db(connection, solar, wind, hydro, battery, solar_fixed, solar_360):
             utc_timestamp = datetime.now(timezone.utc)
 
             # Insert UTC timestamp into the date_time column
-            sql = "INSERT INTO historical_data (date_time, solar_percentage, wind_percentage, hydro_percentage, battery_percentage, solar_fixed_percentage, solar_360_percentage) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            sql = "INSERT INTO historical_data (date_time, solar_percentage, wind_percentage, hydro_percentage, battery_percentage, solar_fixed_percentage, solar_360_percentage, solar_generation, hydro_generation) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
             cursor.execute(
                 sql,
-                (utc_timestamp, solar, wind, hydro, battery, solar_fixed, solar_360),
+                (utc_timestamp, solar, wind, hydro, battery, solar_fixed, solar_360, solar_generation, hydro_generation),
             )
             connection.commit()
             logging.info(
-                f"Data saved: DateTime={utc_timestamp}, Solar={solar}, Wind={wind}, Hydro={hydro}, Battery={battery}, Solar_Fixed={solar_fixed}, Solar_360={solar_360}"
+                f"Data saved: DateTime={utc_timestamp}, Solar={solar}, Wind={wind}, Hydro={hydro}, Battery={battery}, Solar_Fixed={solar_fixed}, Solar_360={solar_360}, Solar_Gen={solar_generation}, Hydro_Gen={hydro_generation}"
             )
     except pymysql.MySQLError as e:
         logging.error(f"Error saving data to database: {e}")
@@ -123,11 +128,13 @@ def main():
                 solar360 = format_value(
                     clamp(data[0].get("Solar 360 Tracker (%)", 0), 0, 100)
                 )
+                solar_generation = format_value(data[0].get("Solar Generation (kW)"))
+                hydro_generation = format_value(data[0].get("Hydro Generation (kW)"))
                 logging.info(
-                    f"Fetched data at {datetime.now(timezone.utc)}: Solar={solar:.2f}, Wind={wind:.2f}, Hydro={hydro:.2f}, Battery={battery:.2f}, Solar_Fixed={solarFixed:.2f}, Solar_360={solar360:.2f}"
+                    f"Fetched data at {datetime.now(timezone.utc)}: Solar={solar:.2f}, Wind={wind:.2f}, Hydro={hydro:.2f}, Battery={battery:.2f}, Solar_Fixed={solarFixed:.2f}, Solar_360={solar360:.2f}, Solar_Gen{solar_generation:.2f}, Hydro_Gen{hydro_generation:.2f}"
                 )
                 save_to_db(
-                    connection, solar, wind, hydro, battery, solarFixed, solar360
+                    connection, solar, wind, hydro, battery, solarFixed, solar360, solar_generation, hydro_generation
                 )
             # time.sleep(12)  # Wait for 1 minute before fetching data again (This is where to define the period of permanent run)
             time.sleep(5) # 10 second fetching
