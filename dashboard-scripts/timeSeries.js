@@ -76,11 +76,6 @@ function updateTimeSeriesChart(fetchedData) {
     chart.series[4].setData(solarFixedData, false);
     chart.series[5].setData(solar360Data, false);
 
-    chart.series[0].setData(solarData, false);
-    chart.series[1].setData(windData, false);
-    chart.series[2].setData(hydroData, false);
-    chart.series[3].setData(batteryData, false);
-
     /* chart.xAxis[0].setCategories(fetchedData.interval_times, false);*/
     chart.redraw();
 
@@ -316,38 +311,38 @@ function createTimeSeriesChart() {
           ],
         },
       },
-      series: [
-        {
-          name: "Solar",
-          data: [],
-          color: "#fe6a35",
-        },
-        {
-          name: "Wind",
-          data: [],
-          color: "#2caffe",
-        },
-        {
-          name: "Hydro",
-          data: [],
-          color: "navy",
-        },
-        {
-          name: "Battery",
-          data: [],
-          color: "#24d63b",
-        },
-        {
-          name: "Solar Fixed",
-          data: [],
-          color: "#17ada1",
-        },
-        {
-          name: "Solar Tracking",
-          data: [],
-          color: "#d11717",
-        },
-      ],
     },
+    series: [
+      {
+        name: "Solar",
+        data: [],
+        color: "#fe6a35",
+      },
+      {
+        name: "Wind",
+        data: [],
+        color: "#2caffe",
+      },
+      {
+        name: "Hydro",
+        data: [],
+        color: "navy",
+      },
+      {
+        name: "Battery",
+        data: [],
+        color: "#24d63b",
+      },
+      {
+        name: "Solar Fixed",
+        data: [],
+        color: "#17ada1",
+      },
+      {
+        name: "Solar Tracking",
+        data: [],
+        color: "#d11717",
+      },
+    ],
   });
 }
