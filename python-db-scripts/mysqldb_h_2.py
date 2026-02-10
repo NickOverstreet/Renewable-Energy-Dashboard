@@ -11,16 +11,9 @@ from config import db_host, db_name, db_password, db_user
 # JSON URL
 json_url = "https://m.lkeportal.com/publicsolarbatch/ESS.json"
 
-# # Set up logging to the server
-# logging.basicConfig(
-#     filename="text",
-#     level=logging.INFO,
-#     format="%(asctime)s:%(levelname)s:%(message)s",
-# )
-
-# Local logging
+# Set up logging to the server
 logging.basicConfig(
-    filename="red_test.log",
+    filename="/home/ec2-user/logs/renewable_data_3.log",
     level=logging.INFO,
     format="%(asctime)s:%(levelname)s:%(message)s",
 )
