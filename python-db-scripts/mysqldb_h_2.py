@@ -12,11 +12,19 @@ from config import db_host, db_name, db_password, db_user
 json_url = "https://m.lkeportal.com/publicsolarbatch/ESS.json"
 
 # Set up logging to the server
+<<<<<<< HEAD
 """ logging.basicConfig(
     filename="/home/ec2-user/logs/renewable_data_3.log",
     level=logging.INFO,
     format="%(asctime)s:%(levelname)s:%(message)s",
 ) """
+=======
+# logging.basicConfig(
+#     filename="/home/ec2-user/logs/renewable_data_3.log",
+#     level=logging.INFO,
+#     format="%(asctime)s:%(levelname)s:%(message)s",
+# )
+>>>>>>> 252991a (comment out server logging)
 
 # Time precision enhancement
 """
