@@ -12,11 +12,11 @@ HYDRO_CAPACITY_MW = 30.0
 SAMPLE_INTERVAL_SECONDS = 5.0
 
 # Log to server file
-logging.basicConfig(
+""" logging.basicConfig(
     filename="/home/ec2-user/logs/capacity_factors.log",
     level=logging.INFO,
     format="%(asctime)s:%(levelname)s:%(message)s",
-)
+) """
 
 def calculate_rolling_capacity_factors():
     """Calculate 7-day rolling capacity factors for solar and hydro."""
