@@ -216,8 +216,9 @@ function createTimeSeriesChart() {
       type: "line",
       zoomType: "x",
       height: 700,
-      marginTop: 100,
+      marginTop: 60,
       marginLeft: 55,
+      spacingTop: 0,
 
       resetZoomButton: {
         position: {
@@ -309,6 +310,7 @@ function createTimeSeriesChart() {
             "downloadPDF",
             "downloadSVG",
           ],
+          y: 5, // Move the button down by 5px
         },
       },
     },
