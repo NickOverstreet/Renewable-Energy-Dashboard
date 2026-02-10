@@ -7,7 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Renewable Integration Research Facility</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="shortcut icon" href="">
+    <link rel="icon" type="image/svg+xml" href="/assets/images/faviconv2.svg">
+    <link rel="shortcut icon" href="/assets/images/faviconv2.svg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="gauge.js" defer></script> <!-- defer to load by the order as appears-->
@@ -32,19 +33,19 @@
 <!--Build Gauges Boxes-->
 <div class="container">
         <div class="box">
-            <svg id="solarGauge" width="300" height="300"></svg>
+            <svg id="solarGauge" width="200" height="200"></svg>
             <h2 >Solar</h2>
         </div>
         <div class="box">
-            <svg id="windGauge" width="300" height="300"></svg>
+            <svg id="windGauge" width="200" height="200"></svg>
             <h2>Wind</h2>
         </div>
         <div class="box">
-            <svg id="hydroGauge" width="300" height="300"></svg>
+            <svg id="hydroGauge" width="200" height="200"></svg>
             <h2>Hydro</h2>
         </div>
         <div class="box">
-            <svg id="batteryGauge" width="300" height="300"></svg>
+            <svg id="batteryGauge" width="200" height="200"></svg>
             <h2>Battery</h2>
         </div>
     </div>
