@@ -88,6 +88,10 @@ Run the following SQL commands:
 
        solar_360_percentage FLOAT,
 
+       solar_generation FLOAT,
+
+       hydro_generation FLOAT,
+
        PRIMARY KEY (id, date_time),
 
        INDEX (date_time)
@@ -129,6 +133,32 @@ Run the following SQL commands:
    );
 ```
 
+   - Open another SQL query tab.
+
+Run the following SQL commands:
+
+```sql
+
+   CREATE TABLE capacity_factor_history (
+
+       PARTITION p2016 VALUES LESS THAN (2017),
+
+       id INT NOT NULL AUTO_INCREMENT,
+
+       date_time DATETIME NOT NULL,
+
+       solar_capacity_factor_7d FLOAT DEFAULT NULL,
+
+       hydro_capacity_factor_7d FLOAT DEFAULT NULL,
+
+       PRIMARY KEY (id, date_time),
+
+       INDEX (date_time)
+
+  ) ENGINE=InnoDB;
+
+```
+
 4\. **Edit dbConfig.php (PHP config)**
 
 Located under dashboard-scripts.
@@ -153,12 +183,13 @@ Located under python-db-scripts.
 
 - Set dbname to "renewables"
 
-6\. **Edit mysqldb_h_2.py (Python script)**
+6\. **Edit mysqldb_h_2.py and calculate_rolling_capacity_factors.py (Python scripts)**
 
 Located under python-db-scripts.
 
-Comment out the logging configuration section:
+Make sure to comment out the logging configuration section for both files:
 
+```bash
 logging.basicConfig(
 
     filename="text",
@@ -168,6 +199,7 @@ logging.basicConfig(
     format="%(asctime)s:%(levelname)s:%(message)s",
 
 )
+```
 
 7\. **Start the PHP server**
 
@@ -181,6 +213,12 @@ php -S localhost:8000 -t dashboard-scripts
 
 ```bash
 python3 mysqldb_h_2.py
+```
+
+- Open another terminal and run:
+
+```bash
+python3 calculate_rolling_capacity_factors.py
 ```
 
 - Let the project run for a few seconds so it can gather data.
