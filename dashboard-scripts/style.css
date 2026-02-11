@@ -135,12 +135,13 @@
 
 .lastUpdatedContainer {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .lastUpdatedLabel {
   font-weight: bold;
   margin-right: 6px;
+  font-size: 18px;
 }
 
 /* end of styling for last updated container / label (JSON data) */
@@ -212,7 +213,7 @@ h4 {
   padding: 20px; /* Adds padding around the container */
   background-color: #ededed;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin: 20px auto;
+  margin: 10px auto;
 }
 .grid-item {
   background-color: #007ab8;
