@@ -168,7 +168,7 @@
 
     // Label to showcase last time the date was updated for JSON data
     echo '<div class="lastUpdatedContainer">';
-    echo '<span class="lastUpdatedLabel" id="lastUpdatedLabel">Last updated (UTC): </span>';
+    echo '<span class="lastUpdatedLabel" id="lastUpdatedLabel">Last updated (EST): </span>';
     echo '<span id="jsonLastUpdatedValue">' . htmlspecialchars($jsonLastUpdatedDate ?? '-') . '</span>';
     echo '</div>';
 
