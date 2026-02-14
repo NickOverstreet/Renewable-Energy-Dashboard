@@ -27,39 +27,44 @@
 
 <body style="background-color: #FFFFFF">
 
-<h1>Renewable Integration Research Facility<br />
-    <!--<span style="font-size: 50px">PPL R&D</span>-->
-</h1>
-<!--Build Gauges Boxes-->
-<div class="container">
-        <div class="box">
-            <svg id="solarGauge" width="200" height="200"></svg>
-            <h2 >Solar</h2>
+        <!-- Page header -->
+        <div class="header">
+            <!-- Container to showcase last time the date was updated for JSON data -->
+            <h1>Renewable Integration Research Facility<br />
+            <!--<span style="font-size: 50px">PPL R&D</span>-->
+            </h1>
+            <div class="lastUpdatedContainer">
+                <span class="lastUpdatedLabel" id="lastUpdatedLabel">Last updated (EST): </span>
+                <span id="jsonLastUpdatedValue"><?php echo htmlspecialchars($jsonLastUpdatedDate ?? ''); ?></span>
+            </div>
         </div>
-        <div class="box">
-            <svg id="windGauge" width="200" height="200"></svg>
-            <h2>Wind</h2>
-        </div>
-        <div class="box">
-            <svg id="hydroGauge" width="200" height="200"></svg>
-            <h2>Hydro</h2>
-        </div>
-        <div class="box">
-            <svg id="batteryGauge" width="200" height="200"></svg>
-            <h2>Battery</h2>
-        </div>
-    </div>
 
-   <!-- Time Series Plot Container -->
+   <!-- Time Series Plot AND Build Gauges Boxes container -->
         <div class="container">
-                <div id="chartContainer">
-                    <div class="dateRangeSelector">
-                        <label for="datePicker" class="date-label">Select Date Range:</label>
-                        <input type="text" id="datePicker" placeholder="Select date range" readonly>
-                        <button id="updateChart">Update Chart</button>
-                    </div>
+            <div class="box">
+                <svg id="solarGauge" width="200" height="200"></svg>
+                <h2 >Solar</h2>
+            </div>
+            <div class="box">
+                <svg id="windGauge" width="200" height="200"></svg>
+                <h2>Wind</h2>
+            </div>
+            <div class="box">
+                <svg id="hydroGauge" width="200" height="200"></svg>
+                <h2>Hydro</h2>
+            </div>
+            <div class="box">
+                <svg id="batteryGauge" width="200" height="200"></svg>
+                <h2>Battery</h2>
+            </div>
+            <div id="chartContainer">
+                <div class="dateRangeSelector">
+                    <label for="datePicker" class="date-label">Select Date Range:</label>
+                    <input type="text" id="datePicker" placeholder="Select date range" readonly>
+                    <button id="updateChart">Update Chart</button>
                 </div>
-            <div id="timeSeriesContainer"> </div>
+            </div>
+        <div id="timeSeriesContainer"> </div>
         </div>
 
 <!-- initial fetching !-->
@@ -166,11 +171,11 @@
     // Calculate lcf
     $lcf = $energy / ($timeSince * 90) * 100; //Life Time Capacity Factor
 
-    // Label to showcase last time the date was updated for JSON data
-    echo '<div class="lastUpdatedContainer">';
-    echo '<span class="lastUpdatedLabel" id="lastUpdatedLabel">Last updated (EST): </span>';
-    echo '<span id="jsonLastUpdatedValue">' . htmlspecialchars($jsonLastUpdatedDate ?? '-') . '</span>';
-    echo '</div>';
+    // // Label to showcase last time the date was updated for JSON data
+    // echo '<div class="lastUpdatedContainer">';
+    // echo '<span class="lastUpdatedLabel" id="lastUpdatedLabel">Last updated (EST): </span>';
+    // echo '<span id="jsonLastUpdatedValue">' . htmlspecialchars($jsonLastUpdatedDate ?? '-') . '</span>';
+    // echo '</div>';
 
     // Informative boxes
     echo '<div class="container grid-auto">';

@@ -68,27 +68,9 @@ function updateGauges(check) {
       // Parse the converted EST date string back into a timestamp
       const estTimestamp = new Date(estDate).getTime();
 
-      // Parse latest date into date object
-      const latestTime = new Date(data[0]["Time"].replace(" ", "T"));
-
-      // Convert date object to UI friendly format (e.g. Feb 10, 8:23:42 PM EST )
-      const formattedTime = latestTime.toLocaleString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-        timeZone: "America/New_York",
-        timeZoneName: "short",
-      });
-
-      console.log(formattedTime);
-
       // // keep track of when JSON data was last updated
       document.getElementById("jsonLastUpdatedValue").textContent =
-        formattedTime;
+        data[0]["Time"];
 
       // Update the 5x3 grid items with the JSON data
       document.getElementById("gridItem1").innerHTML =

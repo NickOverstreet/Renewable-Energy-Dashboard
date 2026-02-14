@@ -14,7 +14,7 @@
   justify-content: space-evenly;
   flex-wrap: wrap;
   align-items: flex-start;
-  padding: 20px;
+  padding: 10px;
   width: 98%;
   margin: 0 auto;
   margin-top: 12px;
@@ -35,9 +35,9 @@
   margin: 10px;
   text-align: center;
   min-width: 200px;
-  max-width: 300px; /* set a maximum width to prevent excessive stretching */
+  max-width: 280px; /* set a maximum width to prevent excessive stretching */
   width: calc(50% - 20px); /* adjust the width for different screen sizes */
-  padding-bottom: 20px;
+  padding-bottom: 4px;
   height: auto;
   background: transparent;
 }
@@ -131,17 +131,25 @@
   cursor: default;
 }
 
+.header {
+  align-items: center;
+}
+
 /* styling for last updated container / label (JSON data) */
 
 .lastUpdatedContainer {
   text-align: center;
-  margin-top: 10px;
+  margin-left: 20px;
+  font-size: clamp(10px, 1.8vw, 14px);
+  color: #444;
+  white-space: nowrap;
 }
 
 .lastUpdatedLabel {
-  font-weight: bold;
+  font-weight: 600;
   margin-right: 6px;
-  font-size: 18px;
+  font-size: clamp(12px, 1.8vw, 16px);
+  color: #007ab8;
 }
 
 /* end of styling for last updated container / label (JSON data) */
@@ -165,12 +173,11 @@ h1 {
   /* Header Style */
   font-family:
     "Raleway OTF", "Raleway", Arial, sans-serif; /* Change font family */
-  font-weight: 600; /* Change the boldness */
-  font-size: 21px; /* Change font size */
+  font-weight: 1000; /* Change the boldness */
+  font-size: clamp(16px, 4vw, 32px); /* size changes with screen view width */
   color: #001489; /* Change text color */
-  margin-bottom: 15px; /* Space below the heading */
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
+  letter-spacing: 0.3px;
 }
 
 h2 {
@@ -179,8 +186,7 @@ h2 {
   font-weight: 500; /* Change boldness */
   font-size: 20px; /* Change font size */
   color: #007ab8; /* Change text color */
-  margin-bottom: 10px; /* Space below the heading */
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin: 0;
 }
 
 h3 {
