@@ -191,7 +191,7 @@ h1 {
 h2 {
   /* Style for dial's labels */
   font-family: "Roboto", Arial, sans-serif; /* Change font family */
-  font-weight: 600; /* Change boldness */
+  font-weight: 500; /* Change boldness */
   font-size: 20px; /* Change font size */
   color: #007ab8; /* Change text color */
   margin: 0;
