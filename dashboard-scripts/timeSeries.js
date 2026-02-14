@@ -215,10 +215,9 @@ function createTimeSeriesChart() {
     chart: {
       type: "line",
       zoomType: "x",
-      height: 700,
+      height: 600,
       marginTop: 60,
-      marginLeft: 55,
-      spacingTop: 0,
+      marginLeft: 60,
 
       resetZoomButton: {
         position: {
@@ -251,6 +250,7 @@ function createTimeSeriesChart() {
           color: "#298fc2",
           font: "Times New Roman",
           fontWeight: "bold",
+          fontSize: "14px",
         },
       },
 
@@ -277,6 +277,7 @@ function createTimeSeriesChart() {
           color: "#298fc2",
           font: "Times New Roman",
           fontWeight: "bold",
+          fontSize: "14px",
         },
       },
       labels: {
@@ -336,12 +337,12 @@ function createTimeSeriesChart() {
         color: "#24d63b",
       },
       {
-        name: "Solar Fixed",
+        name: "Fixed Solar",
         data: [],
-        color: "#17ada1",
+        color: "#e9d30f",
       },
       {
-        name: "Solar Tracking",
+        name: "Duel Axis Solar",
         data: [],
         color: "#d11717",
       },

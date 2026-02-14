@@ -14,7 +14,7 @@
   justify-content: space-evenly;
   flex-wrap: wrap;
   align-items: flex-start;
-  padding: 20px;
+  padding: 10px;
   width: 98%;
   margin: 0 auto;
   margin-top: 12px;
@@ -35,9 +35,9 @@
   margin: 10px;
   text-align: center;
   min-width: 200px;
-  max-width: 300px; /* set a maximum width to prevent excessive stretching */
+  max-width: 280px; /* set a maximum width to prevent excessive stretching */
   width: calc(50% - 20px); /* adjust the width for different screen sizes */
-  padding-bottom: 20px;
+  padding-bottom: 4px;
   height: auto;
   background: transparent;
 }
@@ -131,17 +131,30 @@
   cursor: default;
 }
 
+.header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* columns expand equally */
+  width: 97%;
+  margin: 0 auto;
+  align-items: baseline; /* columns stay on same level */
+}
+
 /* styling for last updated container / label (JSON data) */
 
 .lastUpdatedContainer {
-  text-align: center;
-  margin-top: 10px;
+  grid-column: 1; /* keep on the left */
+  grid-row: 1; /* keep aligned with header title */
+  justify-self: start;
+  font-size: clamp(9px, 1.8vw, 13px); /* size changes with screen size */
+  color: #444;
+  white-space: nowrap;
 }
 
 .lastUpdatedLabel {
-  font-weight: bold;
+  font-weight: 600;
   margin-right: 6px;
-  font-size: 18px;
+  font-size: clamp(11px, 1.8vw, 15px); /* size changes with screen size */
+  color: #001489;
 }
 
 /* end of styling for last updated container / label (JSON data) */
@@ -162,15 +175,17 @@ body {
 }
 
 h1 {
-  /* Header Style */
+  /* Header title */
+  grid-column: 2; /* have title in middle column */
+  grid-row: 1; /* keep aligned with last updated container */
   font-family:
     "Raleway OTF", "Raleway", Arial, sans-serif; /* Change font family */
-  font-weight: 600; /* Change the boldness */
-  font-size: 21px; /* Change font size */
+  font-weight: 1000; /* Change the boldness */
+  font-size: clamp(16px, 4vw, 32px); /* size changes with screen view width */
   color: #001489; /* Change text color */
-  margin-bottom: 15px; /* Space below the heading */
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
+  letter-spacing: 0.3px;
+  margin: 0;
 }
 
 h2 {
@@ -179,8 +194,7 @@ h2 {
   font-weight: 500; /* Change boldness */
   font-size: 20px; /* Change font size */
   color: #007ab8; /* Change text color */
-  margin-bottom: 10px; /* Space below the heading */
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin: 0;
 }
 
 h3 {
@@ -263,3 +277,27 @@ h4 {
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }*/
+
+/* On screens <= 900px, collapse the column header layout
+   into a single-column stack (title on top, timestamp below). */
+@media (max-width: 900px) {
+  /* Switch header grid from multi-column to single-column */
+  .header {
+    grid-template-columns: 1fr;
+    text-align: center; /* Ensures consistent centering when stacked */
+  }
+
+  /* Move timestamp below title and center it */
+  .lastUpdatedContainer {
+    grid-column: 1;
+    grid-row: 2; /* Explicitly place below the title */
+    justify-self: center;
+  }
+
+  /* Keep title on top when stacked */
+  h1 {
+    grid-column: 1;
+    grid-row: 1; /* Ensure title stays first */
+    justify-self: center;
+  }
+}

@@ -26,40 +26,42 @@
 
 
 <body style="background-color: #FFFFFF">
-
-<h1>Renewable Integration Research Facility<br />
-    <!--<span style="font-size: 50px">PPL R&D</span>-->
-</h1>
-<!--Build Gauges Boxes-->
-<div class="container">
-        <div class="box">
-            <svg id="solarGauge" width="200" height="200"></svg>
-            <h2 >Solar</h2>
-        </div>
-        <div class="box">
-            <svg id="windGauge" width="200" height="200"></svg>
-            <h2>Wind</h2>
-        </div>
-        <div class="box">
-            <svg id="hydroGauge" width="200" height="200"></svg>
-            <h2>Hydro</h2>
-        </div>
-        <div class="box">
-            <svg id="batteryGauge" width="200" height="200"></svg>
-            <h2>Battery</h2>
+    <div class="header">
+        <h1>Renewable Integration Research Facility
+        <!--<span style="font-size: 50px">PPL R&D</span>-->
+        </h1>
+        <!-- Container to showcase last time the date was updated for JSON data -->
+        <div class="lastUpdatedContainer">
+            <span class="lastUpdatedLabel" id="lastUpdatedLabel">Last updated (EST): </span>
+            <span id="jsonLastUpdatedValue"><?php echo htmlspecialchars($jsonLastUpdatedDate ?? ''); ?></span>
         </div>
     </div>
-
-   <!-- Time Series Plot Container -->
-        <div class="container">
-                <div id="chartContainer">
-                    <div class="dateRangeSelector">
-                        <label for="datePicker" class="date-label">Select Date Range:</label>
-                        <input type="text" id="datePicker" placeholder="Select date range" readonly>
-                        <button id="updateChart">Update Chart</button>
-                    </div>
+    <!-- Time Series Plot AND Build Gauges Boxes container -->
+    <div class="container">
+            <div class="box">
+                <svg id="solarGauge" width="200" height="200"></svg>
+                <h2 >Solar</h2>
+            </div>
+            <div class="box">
+                <svg id="windGauge" width="200" height="200"></svg>
+                <h2>Wind</h2>
+            </div>
+            <div class="box">
+                <svg id="hydroGauge" width="200" height="200"></svg>
+                <h2>Hydro</h2>
+            </div>
+            <div class="box">
+                <svg id="batteryGauge" width="200" height="200"></svg>
+                <h2>Battery</h2>
+            </div>
+            <div id="chartContainer">
+                <div class="dateRangeSelector">
+                    <label for="datePicker" class="date-label">Select Date Range:</label>
+                    <input type="text" id="datePicker" placeholder="Select date range" readonly>
+                    <button id="updateChart">Update Chart</button>
                 </div>
-            <div id="timeSeriesContainer"> </div>
+            </div>
+        <div id="timeSeriesContainer"> </div>
         </div>
 
 <!-- initial fetching !-->
@@ -166,11 +168,11 @@
     // Calculate lcf
     $lcf = $energy / ($timeSince * 90) * 100; //Life Time Capacity Factor
 
-    // Label to showcase last time the date was updated for JSON data
-    echo '<div class="lastUpdatedContainer">';
-    echo '<span class="lastUpdatedLabel" id="lastUpdatedLabel">Last updated (EST): </span>';
-    echo '<span id="jsonLastUpdatedValue">' . htmlspecialchars($jsonLastUpdatedDate ?? '-') . '</span>';
-    echo '</div>';
+    // // Label to showcase last time the date was updated for JSON data
+    // echo '<div class="lastUpdatedContainer">';
+    // echo '<span class="lastUpdatedLabel" id="lastUpdatedLabel">Last updated (EST): </span>';
+    // echo '<span id="jsonLastUpdatedValue">' . htmlspecialchars($jsonLastUpdatedDate ?? '-') . '</span>';
+    // echo '</div>';
 
     // Informative boxes
     echo '<div class="container grid-auto">';
@@ -217,17 +219,18 @@
 ?>
 
 <!--Add text below boxes -->
+    <div class="container">
     <div class="boxT">
         <h3>
-        PPL R&D's Renewable Integration Research Facility combines actual 30 megawatts hydroelectric, 10.2 megawatts of solar
-        (fixed, multi-axis tracking, and single-axis tracking), lithium-ion batteries, and wind generation data to show how
-        the complementarity of multiple types of renewable energy, including solar, wind, and hydro, can be combined with energy
-        storage to provide 100% renewable, more-reliable, and cost-effective renewable electricity to customers.
-        Data are not simulated. Raw data are being collected from sensors at the site and automatically live-streamed to the
-        public every few seconds without review or modification.
+            PPL R&D's Renewable Integration Research Facility combines actual 30 megawatts hydroelectric, 10.2 megawatts of solar
+            (fixed, multi-axis tracking, and single-axis tracking), lithium-ion batteries, and wind generation data to show how
+            the complementarity of multiple types of renewable energy, including solar, wind, and hydro, can be combined with energy
+            storage to provide 100% renewable, more-reliable, and cost-effective renewable electricity to customers.
+            Data are not simulated. Raw data are being collected from sensors at the site and automatically live-streamed to the
+            public every few seconds without review or modification.
         </h3>
     </div>
-
+    
     <div class="boxT">
         <h3>
             &copy;<?php echo date('Y')?> PPL Corporation. All rights reserved.
@@ -236,5 +239,6 @@
             are not liable for any errors or delays in content or for any actions taken in reliance on any data.
         </h3>
     </div>
+</div>
 </body>
 </html>
