@@ -18,3 +18,7 @@ dashboard-old-scripts/config/API/ConfigAPI.php
 # Visual Studio / VS Code workspace files
 .vs/
 .venv/
+
+# macOS metadata files
+.DS_Store
+**/.DS_Store
