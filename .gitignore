@@ -19,5 +19,6 @@ dashboard-old-scripts/config/API/ConfigAPI.php
 .vs/
 .venv/
 
-# macOS metadata file
+# macOS metadata files
 .DS_Store
+**/.DS_Store

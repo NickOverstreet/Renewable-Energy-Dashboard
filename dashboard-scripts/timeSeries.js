@@ -208,6 +208,21 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initial data fetch for the current day
   fetchData(startDate, endDate, startTime);
   updateGauges(checkIfTodaySelected(endDate));
+
+  // Auto-refresh chart aligned to 5-minute clock intervals (e.g. 11:20, 11:25, 11:30)
+  function msUntilNextFiveMinutes() {
+    const now = new Date();
+    const ms = now.getMinutes() * 60 * 1000 + now.getSeconds() * 1000 + now.getMilliseconds();
+    const interval = 5 * 60 * 1000;
+    return interval - (ms % interval);
+  }
+
+  setTimeout(() => {
+    fetchData(startDate, endDate, startTime);
+    setInterval(() => {
+      fetchData(startDate, endDate, startTime);
+    }, 5 * 60 * 1000);
+  }, msUntilNextFiveMinutes());
 });
 
 function createTimeSeriesChart() {
