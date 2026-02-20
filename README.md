@@ -12,8 +12,6 @@ Renewable-Energy-Dashboard/
 │   ├── app.py                              # FastAPI app + all three background tasks
 │   ├── cache.py                            # Shared in-memory cache (solar + wind)
 │   ├── database.py                         # MySQL connection helper
-│   ├── mysqldb_h_2.py                      # Standalone data ingestion script (optional)
-│   ├── calculate_rolling_capacity_factors.py  # Standalone capacity factor script (optional)
 │   ├── config.py                           # Credentials — gitignored, do not commit
 │   ├── configExample.py                    # Template for config.py
 │   ├── requirements.txt
