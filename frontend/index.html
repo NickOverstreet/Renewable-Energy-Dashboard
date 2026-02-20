@@ -16,10 +16,7 @@
     <script src="js/timeSeries.js" defer></script>
     <script src="js/Wind_API.js" defer></script>
     <script src="js/rollingCapacityFactors.js" defer></script>
-    <script src="https://code.highcharts.com/stock/highstock.js"></script>
-    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
-    <script src="https://code.highcharts.com/modules/boost.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js" defer></script>
 </head>
 
 <body style="background-color: #FFFFFF">
@@ -56,8 +53,8 @@
                 <button id="updateChart">Update Chart</button>
                 <button id="resetChart">Reset</button>
             </div>
+            <div id="timeSeriesContainer"></div>
         </div>
-        <div id="timeSeriesContainer"></div>
     </div>
 
     <!-- Informative grid -->

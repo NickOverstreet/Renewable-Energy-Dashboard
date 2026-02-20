@@ -1,3 +1,4 @@
+/* global echarts */
 // Global variable to store fetched data
 let fetchedData = null;
 let startDate = null;
@@ -20,6 +21,12 @@ let latestRealTimeData = {
   timestamp: null,
 };
 
+// ECharts instance and per-series data arrays (kept in sync for real-time appends)
+let timeSeriesChart = null;
+let chartData = {
+  solar: [], wind: [], hydro: [], battery: [], solarFixed: [], solar360: [],
+};
+
 // Request the data from the server through API
 async function fetchData(startDate, endDate, startTime) {
   try {
@@ -27,74 +34,53 @@ async function fetchData(startDate, endDate, startTime) {
       `${API_BASE_URL}/data?startDate=${startDate}&endDate=${endDate}&startTime=${startTime}`,
     );
     const data = await response.text();
-    const fetchedData = JSON.parse(data);
+    const parsedData = JSON.parse(data);
 
-    if (fetchedData.error) {
-      console.error("Error from server:", fetchedData.error);
+    if (parsedData.error) {
+      console.error("Error from server:", parsedData.error);
       return;
     }
-    // Convert times to milliseconds if needed
-    fetchedData.interval_times = fetchedData.interval_times.map((time) =>
+    // Convert times to milliseconds
+    parsedData.interval_times = parsedData.interval_times.map((time) =>
       new Date(time).getTime(),
     );
-    updateTimeSeriesChart(fetchedData);
+    updateTimeSeriesChart(parsedData);
   } catch (error) {
     console.error("Error fetching data:", error);
   }
 }
-function updateTimeSeriesChart(fetchedData) {
-  if (!fetchedData) return;
 
-  const chart = Highcharts.charts.find(
-    (c) => c.renderTo.id === "timeSeriesContainer",
-  );
-  if (chart) {
-    // Convert interval_times to Unix timestamps in milliseconds
-    const timestamps = fetchedData.interval_times.map((time) =>
-      new Date(time).getTime(),
-    );
-    // Map data arrays to the format [timestamp, value]
-    const solarData = fetchedData.solar.map((val, i) => [timestamps[i], val]);
-    const windData = fetchedData.wind.map((val, i) => [timestamps[i], val]);
-    const hydroData = fetchedData.hydro.map((val, i) => [timestamps[i], val]);
-    const batteryData = fetchedData.battery.map((val, i) => [
-      timestamps[i],
-      val,
-    ]);
-    const solarFixedData = fetchedData.solarFixed.map((val, i) => [
-      timestamps[i],
-      val,
-    ]);
-    const solar360Data = fetchedData.solar360.map((val, i) => [
-      timestamps[i],
-      val,
-    ]);
+function updateTimeSeriesChart(data) {
+  if (!data || !timeSeriesChart) return;
 
-    chart.series[0].setData(solarData, false);
-    chart.series[1].setData(windData, false);
-    chart.series[2].setData(hydroData, false);
-    chart.series[3].setData(batteryData, false);
-    chart.series[4].setData(solarFixedData, false);
-    chart.series[5].setData(solar360Data, false);
+  const timestamps = data.interval_times;
 
-    /* chart.xAxis[0].setCategories(fetchedData.interval_times, false);*/
-    chart.redraw();
+  chartData.solar      = data.solar.map((val, i) => [timestamps[i], val]);
+  chartData.wind       = data.wind.map((val, i) => [timestamps[i], val]);
+  chartData.hydro      = data.hydro.map((val, i) => [timestamps[i], val]);
+  chartData.battery    = data.battery.map((val, i) => [timestamps[i], val]);
+  chartData.solarFixed = data.solarFixed.map((val, i) => [timestamps[i], val]);
+  chartData.solar360   = data.solar360.map((val, i) => [timestamps[i], val]);
 
-    // Give gauges initial values
-    if (!gaugesInitialized) {
-      const lastIndex = fetchedData.solar.length - 1;
-      const latestSolar = fetchedData.solar[lastIndex];
-      const latestWind = fetchedData.wind[lastIndex];
-      const latestHydro = fetchedData.hydro[lastIndex];
-      const latestBattery = fetchedData.battery[lastIndex];
+  timeSeriesChart.setOption({
+    series: [
+      { data: chartData.solar },
+      { data: chartData.wind },
+      { data: chartData.hydro },
+      { data: chartData.battery },
+      { data: chartData.solarFixed },
+      { data: chartData.solar360 },
+    ],
+  });
 
-      createGaugeChart(latestSolar, "solarGauge");
-      createGaugeChart(latestWind, "windGauge");
-      createGaugeChart(latestHydro, "hydroGauge");
-      createGaugeChart(latestBattery, "batteryGauge");
-
-      gaugesInitialized = true; // Mark gauges as initialized
-    }
+  // Give gauges initial values
+  if (!gaugesInitialized) {
+    const lastIndex = data.solar.length - 1;
+    createGaugeChart(data.solar[lastIndex], "solarGauge");
+    createGaugeChart(data.wind[lastIndex], "windGauge");
+    createGaugeChart(data.hydro[lastIndex], "hydroGauge");
+    createGaugeChart(data.battery[lastIndex], "batteryGauge");
+    gaugesInitialized = true;
   }
 }
 
@@ -107,23 +93,31 @@ function checkIfTodaySelected(endDate) {
 }
 
 function addRealTimeDataToChart() {
-  const chart = Highcharts.charts.find(
-    (c) => c.renderTo.id === "timeSeriesContainer",
-  );
-  if (chart) {
-    const { timestamp, solar, wind, hydro, battery, solarFixed, solar360 } =
-      latestRealTimeData;
-    chart.series[0].addPoint([timestamp, solar], true, false);
-    chart.series[1].addPoint([timestamp, wind], true, false);
-    chart.series[2].addPoint([timestamp, hydro], true, false);
-    chart.series[3].addPoint([timestamp, battery], true, false);
-    chart.series[4].addPoint([timestamp, solarFixed], true, false);
-    chart.series[5].addPoint([timestamp, solar360], true, false);
-  }
+  if (!timeSeriesChart) return;
+  const { timestamp, solar, wind, hydro, battery, solarFixed, solar360 } =
+    latestRealTimeData;
+
+  chartData.solar.push([timestamp, solar]);
+  chartData.wind.push([timestamp, wind]);
+  chartData.hydro.push([timestamp, hydro]);
+  chartData.battery.push([timestamp, battery]);
+  chartData.solarFixed.push([timestamp, solarFixed]);
+  chartData.solar360.push([timestamp, solar360]);
+
+  timeSeriesChart.setOption({
+    series: [
+      { data: chartData.solar },
+      { data: chartData.wind },
+      { data: chartData.hydro },
+      { data: chartData.battery },
+      { data: chartData.solarFixed },
+      { data: chartData.solar360 },
+    ],
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  createTimeSeriesChart();
+  timeSeriesChart = createTimeSeriesChart();
 
   // Initialize flatpickr with range mode for date selection
   const datePicker = flatpickr("#datePicker", {
@@ -182,7 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       if (startDate && endDate) {
         await fetchData(startDate, endDate, "00:00:00"); // Fetch and update chart with the selected date range
-        // updateGauges(checkIfTodaySelected(endDate));
       } else {
         alert("Please select a valid date range.");
       }
@@ -244,141 +237,102 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function createTimeSeriesChart() {
-  return Highcharts.chart("timeSeriesContainer", {
-    chart: {
-      type: "line",
-      zoomType: "x",
-      height: 600,
-      marginTop: 60,
-      marginLeft: 60,
+  const container = document.getElementById("timeSeriesContainer");
+  container.style.height = "520px";
 
-      resetZoomButton: {
-        position: {
-          align: "left",
-          verticalAlign: "top",
-          x: 20,
-          y: 10,
-        },
-        relativeTo: "chart",
-      },
-      zooming: {
-        mouseWheel: false,
-      },
+  const chart = echarts.init(container);
+
+  chart.setOption({
+    animation: false,
+    grid: {
+      left: 60,
+      top: 55,
+      right: 60,
+      bottom: 110,
     },
-    credits: {
-      enabled: false,
-    },
-    title: {
-      text: null,
-      style: {
-        color: "#298fc2",
-      },
+    legend: {
+      bottom: 8,
+      data: ["Solar", "Wind", "Hydro", "Battery", "Fixed Solar", "Dual Axis Solar"],
     },
     xAxis: {
-      type: "datetime",
-      title: {
-        text: "Date and Time (EST)",
-        align: "middle",
-        style: {
-          color: "#298fc2",
-          font: "Times New Roman",
-          fontWeight: "bold",
-          fontSize: "14px",
+      type: "time",
+      name: "Date and Time (EST)",
+      nameLocation: "middle",
+      nameGap: 50,
+      nameTextStyle: {
+        color: "#298fc2",
+        fontFamily: "Times New Roman",
+        fontWeight: "bold",
+        fontSize: 14,
+      },
+      axisLabel: {
+        formatter: function (value) {
+          const d = new Date(value);
+          const month = d.toLocaleString("en-US", { timeZone: "America/New_York", month: "short" });
+          const day   = d.toLocaleString("en-US", { timeZone: "America/New_York", day: "numeric" });
+          const time  = d.toLocaleString("en-US", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit", hour12: false });
+          return `${month} ${day}\n${time}`;
         },
       },
-
-      labels: {
-        format: "{value:%e %b<br>%k:%M}", // Adjust the label format as needed
-        rotation: -45,
-        /*  step: 1,*/
-      },
-    },
-    time: {
-      // Timezone matches EST time
-      timezone: "America/New_York", // Automatically adjusts for EST/EDT
-      useUTC: false, // Ensure times aren't handled in UTC and converted to EST/EDT for display
     },
     yAxis: {
+      type: "value",
+      name: "Percentage (%)",
+      nameLocation: "middle",
+      nameGap: 40,
+      nameTextStyle: {
+        color: "#298fc2",
+        fontFamily: "Times New Roman",
+        fontWeight: "bold",
+        fontSize: 14,
+      },
       min: 0,
       max: 100,
-      tickInterval: 5,
-      title: {
-        text: "Percentage (%)",
-        align: "middle",
-        x: -28,
-        style: {
-          color: "#298fc2",
-          font: "Times New Roman",
-          fontWeight: "bold",
-          fontSize: "14px",
-        },
-      },
-      labels: {
-        align: "left",
-        x: -25,
-      },
+      interval: 5,
     },
     tooltip: {
-      shared: true,
-      xDateFormat: "%Y-%m-%d %H:%M:%S",
-    },
-    plotOptions: {
-      series: {
-        animation: false,
-        enableMouseTracking: true,
-        shadow: false,
+      trigger: "axis",
+      formatter: function (params) {
+        const time = new Date(params[0].value[0]).toLocaleString("en-US", {
+          timeZone: "America/New_York",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        });
+        let html = time + "<br>";
+        params.forEach((p) => {
+          html +=
+            `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;` +
+            `background:${p.color};margin-right:5px;"></span>` +
+            `${p.seriesName}: <b>${p.value[1]}%</b><br>`;
+        });
+        return html;
       },
     },
-    exporting: {
-      buttons: {
-        contextButton: {
-          menuItems: [
-            "viewFullscreen",
-            "printChart",
-            "separator",
-            "downloadCSV",
-            "downloadXLS",
-            "separator",
-            "downloadPNG",
-            "downloadJPEG",
-            "downloadPDF",
-            "downloadSVG",
-          ],
-          y: 5, // Move the button down by 5px
-        },
+    dataZoom: [
+      { type: "inside", xAxisIndex: 0 }, // scroll wheel / pinch zoom
+    ],
+    toolbox: {
+      right: 10,
+      top: 5,
+      feature: {
+        saveAsImage: { title: "Download PNG" },
       },
     },
     series: [
-      {
-        name: "Solar",
-        data: [],
-        color: "#fe6a35",
-      },
-      {
-        name: "Wind",
-        data: [],
-        color: "#2caffe",
-      },
-      {
-        name: "Hydro",
-        data: [],
-        color: "navy",
-      },
-      {
-        name: "Battery",
-        data: [],
-        color: "#24d63b",
-      },
-      {
-        name: "Fixed Solar",
-        data: [],
-        color: "#ffc247",
-      },
-      {
-        name: "Dual Axis Solar",
-        data: [],
-        color: "#d11717",
-      },
+      { name: "Solar",          type: "line", data: [], color: "#fe6a35", symbol: "circle", symbolSize: 4, lineStyle: { width: 2 } },
+      { name: "Wind",           type: "line", data: [], color: "#2caffe", symbol: "circle", symbolSize: 4, lineStyle: { width: 2 } },
+      { name: "Hydro",          type: "line", data: [], color: "navy",    symbol: "circle", symbolSize: 4, lineStyle: { width: 2 } },
+      { name: "Battery",        type: "line", data: [], color: "#24d63b", symbol: "circle", symbolSize: 4, lineStyle: { width: 2 } },
+      { name: "Fixed Solar",    type: "line", data: [], color: "#ffc247", symbol: "circle", symbolSize: 4, lineStyle: { width: 2 } },
+      { name: "Dual Axis Solar",type: "line", data: [], color: "#d11717", symbol: "circle", symbolSize: 4, lineStyle: { width: 2 } },
     ],
   });
+
+  window.addEventListener("resize", () => chart.resize());
+  return chart;
 }
