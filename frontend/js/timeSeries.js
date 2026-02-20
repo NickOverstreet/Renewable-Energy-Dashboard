@@ -199,6 +199,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     datePicker.clear();
     datePicker.set("maxDate", "today");
+    if (timeSeriesChart) {
+      timeSeriesChart.dispatchAction({ type: "dataZoom", start: 0, end: 100 });
+    }
     fetchData(startDate, endDate, startTime);
   }
 
