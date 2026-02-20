@@ -149,7 +149,7 @@ SELECT * FROM historical_data LIMIT 5;
 
 ---
 
-### 4. Create the virtual environment
+### 4. Create the virtual environment (Optional)
 
 From the project root:
 
