@@ -6,7 +6,7 @@ This is a rewrite of the original PHP-based dashboard. The motivation for the re
 
 - **Faster responses** — Solar and wind API data is fetched server-side every 5 seconds and served from an in-memory cache, reducing `/solar` and `/wind` response times from ~200ms to under 5ms.
 - **Simpler operations** — The original version required three separate processes running simultaneously (web server, data ingestion script, capacity factor script). This version runs everything in a single `uvicorn` process with background tasks, managed by one systemd service.
-- **One language** — All backend logic is in Python. The original version mixed PHP for the web layer with Python scripts for data pipelines.
+- **One language** — All backend logic is in Python. The original version mixed PHP for the web layer with Python scripts for data pipelines. A single-language backend is significantly easier for future collaborators: there is no PHP environment to configure, no context-switching between two runtimes, and the entire codebase can be understood, modified, and debugged using only Python tooling.
 - **Auto-generated API docs** — FastAPI provides interactive documentation at `/docs`, making the API easier to understand and test.
 - **Replaced Highcharts with Apache ECharts** — Highcharts Stock (`highstock.js`) requires a paid commercial license and caused CDN load failures that silently broke the time series chart. ECharts is Apache 2.0 licensed (free for commercial use) and is now bundled from a CDN with no licensing concerns.
 
