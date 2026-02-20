@@ -8,6 +8,7 @@ This is a rewrite of the original PHP-based dashboard. The motivation for the re
 - **Simpler operations** — The original version required three separate processes running simultaneously (web server, data ingestion script, capacity factor script). This version runs everything in a single `uvicorn` process with background tasks, managed by one systemd service.
 - **One language** — All backend logic is in Python. The original version mixed PHP for the web layer with Python scripts for data pipelines.
 - **Auto-generated API docs** — FastAPI provides interactive documentation at `/docs`, making the API easier to understand and test.
+- **Replaced Highcharts with Apache ECharts** — Highcharts Stock (`highstock.js`) requires a paid commercial license and caused CDN load failures that silently broke the time series chart. ECharts is Apache 2.0 licensed (free for commercial use) and is now bundled from a CDN with no licensing concerns.
 
 ---
 
