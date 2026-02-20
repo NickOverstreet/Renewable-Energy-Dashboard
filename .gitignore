@@ -1,6 +1,9 @@
 # virtual environment
 .venv/
 
+#workspace files
+.vscode/
+
 # python cache
 __pycache__/
 *.pyc
@@ -27,3 +30,4 @@ current/dashboard-old-scripts/config/API/ConfigAPI.php
 
 # macOS metadata
 .DS_Store
+**.DS_Store
