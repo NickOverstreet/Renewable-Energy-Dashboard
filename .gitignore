@@ -19,3 +19,7 @@ backend/config.py
 # macOS metadata
 .DS_Store
 **.DS_Store
+
+# PEM files
+dashboard.pem
+*.pem

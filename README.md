@@ -9,11 +9,11 @@ A live-streaming renewable energy dashboard for PPL R&D's Renewable Integration 
 ```
 Renewable-Energy-Dashboard/
 ├── backend/
-│   ├── app.py                              # FastAPI app, startup cache refresh task
+│   ├── app.py                              # FastAPI app + all three background tasks
 │   ├── cache.py                            # Shared in-memory cache (solar + wind)
 │   ├── database.py                         # MySQL connection helper
-│   ├── mysqldb_h_2.py                      # Data ingestion script (APIs → DB, every 5s)
-│   ├── calculate_rolling_capacity_factors.py  # Capacity factor script (DB → DB, every 5min)
+│   ├── mysqldb_h_2.py                      # Standalone data ingestion script (optional)
+│   ├── calculate_rolling_capacity_factors.py  # Standalone capacity factor script (optional)
 │   ├── config.py                           # Credentials — gitignored, do not commit
 │   ├── configExample.py                    # Template for config.py
 │   ├── requirements.txt
@@ -31,7 +31,7 @@ Renewable-Energy-Dashboard/
 │       ├── timeSeries.js                   # Historical time series chart
 │       ├── rollingCapacityFactors.js       # 7-day capacity factor display
 │       └── Wind_API.js                     # Wind data display
-└── .venv/                                  # Virtual environment (gitignored)
+└── .venv/                                  # Virtual environment — local dev only, gitignored
 ```
 
 ---
@@ -149,9 +149,9 @@ SELECT * FROM historical_data LIMIT 5;
 
 ---
 
-### 4. Create the virtual environment (Optional)
+### 4. Install dependencies
 
-From the project root:
+**Local development (optional venv):**
 
 ```bash
 python -m venv .venv
@@ -165,58 +165,86 @@ source .venv/bin/activate
 pip install -r backend/requirements.txt
 ```
 
+**On the server (no venv — install system-wide for the ec2-user):**
+
+```bash
+pip3 install fastapi uvicorn pymysql python-dotenv
+```
+
+Packages install to `/home/ec2-user/.local/lib/python3.9/site-packages`. Run `which uvicorn` after installing to confirm the path for the service file.
+
 ---
 
 ## Running
 
-Open a separate terminal for each process (activate the venv in each).
-
-**Terminal 1 — FastAPI server + frontend:**
+All three background tasks (cache refresh, data ingestion, capacity factor calculation) start automatically with the FastAPI server. One command runs everything:
 
 ```bash
-uvicorn app:app --app-dir backend --reload
+uvicorn app:app --app-dir backend --reload   # --reload is for local dev only, omit on server
 ```
 
-**Terminal 2 — Data ingestion** (fetches solar + wind APIs → writes to DB every 5 seconds):
-
-```bash
-python backend/mysqldb_h_2.py
-```
-
-**Terminal 3 — Capacity factor calculator** (calculates 7-day rolling capacity factors → writes to DB every 5 minutes):
-
-```bash
-python backend/calculate_rolling_capacity_factors.py
-```
-
-Let the ingestion script run for a few seconds, then open the dashboard:
+Wait a few seconds for the first data cycle, then open the dashboard:
 
 ```
 http://localhost:8000
 ```
-# Server setup
 
-# Running FastAPI with Uvicorn as a System Service
+---
 
-This guide explains how to configure Uvicorn to automatically start on boot and restart if it crashes, using `systemd`.
+## Deploying to the Server
 
------
+### 1. Clone the repo
 
-## Setup
+SSH into the server and clone into the home directory:
 
-### 1. Create the Service File
+```bash
+cd /home/ec2-user
+git clone https://github.com/NickOverstreet/Renewable-Energy-Dashboard
+```
 
-Create the file `/etc/systemd/system/dashboard.service`:
+### 2. Copy `config.py` to the server
+
+`config.py` is gitignored and must be transferred manually. From your local machine:
+
+```bash
+scp -i dashboard.pem backend/config.py ec2-user@<server-ip>:/home/ec2-user/Renewable-Energy-Dashboard/backend/config.py
+```
+
+### 3. Install dependencies on the server
+
+```bash
+pip3 install fastapi uvicorn pymysql python-dotenv
+```
+
+### 4. Pull updates (after code changes)
+
+```bash
+cd /home/ec2-user/Renewable-Energy-Dashboard
+git pull
+sudo systemctl restart dashboard
+```
+
+---
+
+## Server Setup (systemd)
+
+One service file runs the entire application. All three background tasks (cache refresh, data ingestion, capacity factors) start automatically inside the uvicorn process.
+
+---
+
+### 1. Create the service file
+
+**`/etc/systemd/system/dashboard.service`**:
 
 ```ini
 [Unit]
-Description=Dashboard FastAPI Server
+Description=Renewable Energy Dashboard
 After=network.target
 
 [Service]
 User=ec2-user
-WorkingDirectory=/home/ec2-user/your-project-folder
-ExecStart=/usr/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+WorkingDirectory=/home/ec2-user/Renewable-Energy-Dashboard
+ExecStart=/home/ec2-user/.local/bin/uvicorn app:app --app-dir backend --host 0.0.0.0 --port 8000
 Restart=always
 RestartSec=3
 
@@ -224,69 +252,33 @@ RestartSec=3
 WantedBy=multi-user.target
 ```
 
-> **Note:** Update `WorkingDirectory` to match your actual project folder path.
+> **Note:** Confirm the uvicorn path with `which uvicorn` after installing dependencies.
 
------
+---
 
-### 2. Enable and Start the Service
-
-Run these commands after creating the service file:
+### 2. Enable and start the service
 
 ```bash
-# Reload systemd so it picks up the new service file
 sudo systemctl daemon-reload
-
-# Enable the service to start automatically on boot
 sudo systemctl enable dashboard
-
-# Start the service now
 sudo systemctl start dashboard
 ```
 
------
+---
 
-## Useful Commands
+### Useful commands
 
-### Check if the service is running
+| Action | Command |
+|---|---|
+| Check status | `sudo systemctl status dashboard` |
+| Restart | `sudo systemctl restart dashboard` |
+| Stop | `sudo systemctl stop dashboard` |
+| View live logs | `journalctl -u dashboard -f` |
 
-```bash
-sudo systemctl status dashboard
-```
+---
 
-### Start the service
+### Notes
 
-```bash
-sudo systemctl start dashboard
-```
-
-### Stop the service
-
-```bash
-sudo systemctl stop dashboard
-```
-
-### Restart the service (e.g. after making code changes)
-
-```bash
-sudo systemctl restart dashboard
-```
-
-### View live logs
-
-```bash
-journalctl -u dashboard -f
-```
-
-### Disable the service from starting on boot
-
-```bash
-sudo systemctl disable dashboard
-```
-
------
-
-## Notes
-
-- `Restart=always` means systemd will restart Uvicorn automatically if it crashes for any reason, not just on reboot.
-- `RestartSec=3` adds a 3 second delay before restarting, which prevents rapid restart loops if there’s a persistent error.
-- After making changes to the service file itself, always run `sudo systemctl daemon-reload` before restarting the service.
+- `Restart=always` — the service restarts automatically on crash and starts on boot.
+- `RestartSec=3` — adds a 3-second delay before restarting, preventing rapid restart loops on persistent errors.
+- After editing the service file, always run `sudo systemctl daemon-reload` before restarting.

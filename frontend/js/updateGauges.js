@@ -15,21 +15,17 @@ function updateGauges(check) {
       const SolarGen = Math.min(
         Math.max(data[0]["Solar Generation (%)"].toFixed(1), 0),
         100,
-      );
-      const WindGen = Math.max(data[0]["Wind Generation (%)"].toFixed(1), 0);
-      const SOC = Math.max(
-        data[0]["Battery State of Charge (SOC %)"].toFixed(1),
-        0,
-      );
-      const HydroGen = Math.max(data[0]["Hydro Generation (%)"].toFixed(1), 0);
-      const SolarFixedGen = Math.max(data[0]["Solar Fixed (%)"].toFixed(1), 0);
+      ); // total solar generation as % of nameplate, clamped 0–100
+      const WindGen = Math.min(Math.max(data[0]["Wind Generation (%)"].toFixed(1), 0), 100); // wind generation as % of nameplate, clamped 0–100
+      const SOC = Math.min(Math.max(data[0]["Battery State of Charge (SOC %)"].toFixed(1), 0), 100); // battery state of charge %, clamped 0–100
+      const HydroGen = Math.min(Math.max(data[0]["Hydro Generation (%)"].toFixed(1), 0), 100); // hydro generation as % of nameplate, clamped 0–100
+      const SolarFixedGen = Math.min(Math.max(data[0]["Solar Fixed (%)"].toFixed(1), 0), 100); // fixed solar generation as % of nameplate, clamped 0–100
 
       // Safely read the "Solar 360 Tracking (%)" value from the API
       // Optional chaining (?.) prevents errors if the field is missing
       // If the value is undefined or invalid, it will default to 0
-      const Solar360Gen = clamp(data[0]?.["Solar 360 Tracking (%)"]);
+      const Solar360Gen = clamp(data[0]?.["Solar 360 Tracker (%)"]);
 
-      const GenerationS = Math.max(data[0]["Solar Generation (kW)"], 0); //solar
       const GenerationSNegative = data[0]["Solar Generation (kW)"]; //solar
       const GenerationW = Math.max(data[0]["Wind Generation (kW)"], 0); //wind
       const GenerationH = Math.max(data[0]["Hydro Generation (kW)"], 0); //hydro
