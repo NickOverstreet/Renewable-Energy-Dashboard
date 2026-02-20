@@ -194,3 +194,99 @@ Let the ingestion script run for a few seconds, then open the dashboard:
 ```
 http://localhost:8000
 ```
+# Server setup
+
+# Running FastAPI with Uvicorn as a System Service
+
+This guide explains how to configure Uvicorn to automatically start on boot and restart if it crashes, using `systemd`.
+
+-----
+
+## Setup
+
+### 1. Create the Service File
+
+Create the file `/etc/systemd/system/dashboard.service`:
+
+```ini
+[Unit]
+Description=Dashboard FastAPI Server
+After=network.target
+
+[Service]
+User=ec2-user
+WorkingDirectory=/home/ec2-user/your-project-folder
+ExecStart=/usr/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
+> **Note:** Update `WorkingDirectory` to match your actual project folder path.
+
+-----
+
+### 2. Enable and Start the Service
+
+Run these commands after creating the service file:
+
+```bash
+# Reload systemd so it picks up the new service file
+sudo systemctl daemon-reload
+
+# Enable the service to start automatically on boot
+sudo systemctl enable dashboard
+
+# Start the service now
+sudo systemctl start dashboard
+```
+
+-----
+
+## Useful Commands
+
+### Check if the service is running
+
+```bash
+sudo systemctl status dashboard
+```
+
+### Start the service
+
+```bash
+sudo systemctl start dashboard
+```
+
+### Stop the service
+
+```bash
+sudo systemctl stop dashboard
+```
+
+### Restart the service (e.g. after making code changes)
+
+```bash
+sudo systemctl restart dashboard
+```
+
+### View live logs
+
+```bash
+journalctl -u dashboard -f
+```
+
+### Disable the service from starting on boot
+
+```bash
+sudo systemctl disable dashboard
+```
+
+-----
+
+## Notes
+
+- `Restart=always` means systemd will restart Uvicorn automatically if it crashes for any reason, not just on reboot.
+- `RestartSec=3` adds a 3 second delay before restarting, which prevents rapid restart loops if there’s a persistent error.
+- After making changes to the service file itself, always run `sudo systemctl daemon-reload` before restarting the service.
