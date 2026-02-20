@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Renewable Integration Research Facility</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="assets/images/faviconv2.svg">
+    <link rel="shortcut icon" href="assets/images/faviconv2.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="js/config.js" defer></script>
+    <script src="js/gauge.js" defer></script>
+    <script src="js/updateGauges.js" defer></script>
+    <script src="js/timeSeries.js" defer></script>
+    <script src="js/Wind_API.js" defer></script>
+    <script src="js/rollingCapacityFactors.js" defer></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/boost.js"></script>
+</head>
+
+<body style="background-color: #FFFFFF">
+    <div class="header">
+        <h1>Renewable Integration Research Facility</h1>
+        <div class="lastUpdatedContainer">
+            <span class="lastUpdatedLabel" id="lastUpdatedLabel">Last updated (EST): </span>
+            <span id="jsonLastUpdatedValue"></span>
+        </div>
+    </div>
+
+    <!-- Gauges and chart -->
+    <div class="container">
+        <div class="box">
+            <svg id="solarGauge" width="200" height="200"></svg>
+            <h2>Solar</h2>
+        </div>
+        <div class="box">
+            <svg id="windGauge" width="200" height="200"></svg>
+            <h2>Wind</h2>
+        </div>
+        <div class="box">
+            <svg id="hydroGauge" width="200" height="200"></svg>
+            <h2>Hydro</h2>
+        </div>
+        <div class="box">
+            <svg id="batteryGauge" width="200" height="200"></svg>
+            <h2>Battery</h2>
+        </div>
+        <div id="chartContainer">
+            <div class="dateRangeSelector">
+                <label for="datePicker" class="date-label">Select Date Range:</label>
+                <input type="text" id="datePicker" placeholder="Select date range" readonly>
+                <button id="updateChart">Update Chart</button>
+            </div>
+        </div>
+        <div id="timeSeriesContainer"></div>
+    </div>
+
+    <!-- Informative grid -->
+    <div class="container grid-auto">
+        <div id="gridItem4"  class="grid-item">Reduction in CO2: <br><span class="value">-- lbs/Hr</span></div>
+        <div id="gridItem1"  class="grid-item">Wind Turbine Power: <br><span class="value">-- kW</span></div>
+        <div id="gridItem19" class="grid-item">Total Solar Power: <br><span class="value">-- kW</span></div>
+        <div id="gridItem24" class="grid-item">Fixed Solar Power: <br><span class="value">-- kW</span></div>
+        <div id="gridItem25" class="grid-item">360&deg; Tracking Solar Power: <br><span class="value">-- kW</span></div>
+        <div id="gridItem20" class="grid-item">Hydro Power: <br><span class="value">-- kW</span></div>
+        <div id="gridItem21" class="grid-item">Dix1 Power: <br><span class="value">-- MW</span></div>
+        <div id="gridItem22" class="grid-item">Dix2 Power: <br><span class="value">-- MW</span></div>
+        <div id="gridItem23" class="grid-item">Dix3 Power: <br><span class="value">-- MW</span></div>
+        <div id="gridItem15" class="grid-item">Battery Power: <br><span class="value">-- kW</span></div>
+        <div id="gridItem16" class="grid-item">Battery Power Available: <br><span class="value">-- kW</span></div>
+        <div id="gridItem2"  class="grid-item">Wind Speed: <br><span class="value">-- m/s</span></div>
+        <div id="gridItem3"  class="grid-item">Wind Generated Energy: <br><span class="value">-- MWh</span></div>
+        <div id="gridItem5"  class="grid-item">Wind Lifetime Capacity Factor: <br><span class="value">-- %</span></div>
+        <div id="gridItem6"  class="grid-item">Battery Container 1 Temp: <br><span class="value">--&deg;C</span></div>
+        <div id="gridItem7"  class="grid-item">Battery Container 2 Temp: <br><span class="value">--&deg;C</span></div>
+        <div id="gridItem8"  class="grid-item">Solar Irradiance: <br><span class="value">-- W/m&sup2;</span></div>
+        <div id="gridItem9"  class="grid-item">Battery State of Health: <br><span class="value">-- %</span></div>
+        <div id="gridItem10" class="grid-item">Battery DC Voltage: <br><span class="value">-- V</span></div>
+        <div id="gridItem11" class="grid-item">Battery DC Current: <br><span class="value">-- A</span></div>
+        <div id="gridItem12" class="grid-item">Battery Average Cell Voltage: <br><span class="value">-- V</span></div>
+        <div id="gridItem13" class="grid-item">Battery Max, Min Cell Voltage: <br>Max: <span class="value">-- V</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Min: <span class="value">-- V</span></div>
+        <div id="gridItem14" class="grid-item">Exterior Temperature: <br><span class="value">--&deg;C</span></div>
+        <div id="gridItem17" class="grid-item">Maximum Module Temperature: <br><span class="value">--&deg;C</span></div>
+        <div id="gridItem18" class="grid-item">Minimum Module Temperature: <br><span class="value">--&deg;C</span></div>
+        <div id="gridItem26" class="grid-item">Total Solar 7-Day Capacity Factor: <br><span id="solartotalCF7d" class="value">--%</span></div>
+        <div id="gridItem27" class="grid-item">Fixed Solar 7-Day Capacity Factor: <br><span id="solarfixedCF7d" class="value">--%</span></div>
+        <div id="gridItem28" class="grid-item">Dual Solar 7-Day Capacity Factor: <br><span id="solardualCF7d" class="value">--%</span></div>
+        <div id="gridItem29" class="grid-item">Hydro 7-Day Capacity Factor: <br><span id="hydroCF7d" class="value">--%</span></div>
+        <div id="gridItem30" class="grid-item">Wind 7-Day Capacity Factor: <br><span id="windCF7d" class="value">--%</span></div>
+    </div>
+
+    <!-- Footer text -->
+    <div class="container">
+        <div class="boxT">
+            <h3>
+                PPL R&amp;D's Renewable Integration Research Facility combines actual 30 megawatts hydroelectric, 10.2 megawatts of solar
+                (fixed, multi-axis tracking, and single-axis tracking), lithium-ion batteries, and wind generation data to show how
+                the complementarity of multiple types of renewable energy, including solar, wind, and hydro, can be combined with energy
+                storage to provide 100% renewable, more-reliable, and cost-effective renewable electricity to customers.
+                Data are not simulated. Raw data are being collected from sensors at the site and automatically live-streamed to the
+                public every few seconds without review or modification.
+            </h3>
+        </div>
+        <div class="boxT">
+            <h3>
+                &copy;<span id="year"></span> PPL Corporation. All rights reserved.
+                Data provided for informational purposes only and is subject to delay, suspension, update or change,
+                without notice. Not for formal or operational use. PPL corporation, PPL R&amp;D, or PPL subsidiaries,
+                are not liable for any errors or delays in content or for any actions taken in reliance on any data.
+            </h3>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

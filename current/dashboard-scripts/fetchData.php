@@ -41,7 +41,7 @@ try {
     $startDateTime = new DateTime($startDate);
     $endDateTime = new DateTime($endDate);
     $interval = $startDateTime->diff($endDateTime);
-    $groupInterval = 60;  //Data shown for all 60 sec of a minute
+    $groupInterval = 300;  //Data shown for all 60 sec of a minute
     /*// Check if the interval is exactly one day
     if ($interval->days >= 0 && $interval->days < 3) {
     // Use 1-minute intervals for a single day
@@ -57,17 +57,34 @@ try {
 
     //Change table name "renewable_data" after 'FROM' based on your table name
 $stmt = $pdo->prepare("
-        SELECT
-            DATE_FORMAT(DATE_SUB(date_time, INTERVAL FLOOR(SECOND(date_time) / :interval) * :interval SECOND), '%Y-%m-%d %H:%i:%s') AS interval_time,
-            solar_percentage,
-            wind_percentage,
-            hydro_percentage,
-            battery_percentage
-        FROM historical_data
-        WHERE date_time BETWEEN :startDate AND :endDate
-        GROUP BY interval_time
-        ORDER BY interval_time ASC
-    ");
+SELECT
+    interval_time,
+    ROUND(AVG(solar_percentage), 2)   AS solar_percentage,
+    ROUND(AVG(wind_percentage), 2)    AS wind_percentage,
+    ROUND(AVG(hydro_percentage), 2)   AS hydro_percentage,
+    ROUND(AVG(battery_percentage), 2) AS battery_percentage,
+    ROUND(AVG(solar_fixed_percentage), 2) AS solar_fixed_percentage,
+    ROUND(AVG(solar_360_percentage), 2) AS solar_360_percentage
+FROM (
+    SELECT
+        date_time,
+        solar_percentage,
+        wind_percentage,
+        hydro_percentage,
+        battery_percentage,
+        solar_fixed_percentage,
+        solar_360_percentage,
+        FROM_UNIXTIME(
+            FLOOR(UNIX_TIMESTAMP(date_time) / :interval) * :interval
+        ) AS interval_time
+    FROM historical_data
+    WHERE date_time >= :startDate
+      AND date_time <= :endDate
+) t
+GROUP BY interval_time
+ORDER BY interval_time ASC
+");
+
 
     $stmt->bindValue(':interval', $groupInterval, PDO::PARAM_INT);
     $stmt->bindParam(':startDate', $startDateUTC);
@@ -80,6 +97,8 @@ $stmt = $pdo->prepare("
         'wind' => [],
         'hydro' => [],
         'battery' => [],
+        'solarFixed' => [],
+        'solar360' => [],
         'interval_times' => []
     ];
 
@@ -101,6 +120,8 @@ $stmt = $pdo->prepare("
         $data['wind'][] = (float)$row['wind_percentage'];
         $data['hydro'][] = (float)$row['hydro_percentage'];
         $data['battery'][] = (float)$row['battery_percentage'];
+        $data['solarFixed'][] = (float)$row['solar_fixed_percentage'];
+        $data['solar360'][] = (float)$row['solar_360_percentage'];
     }
 
     echo json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

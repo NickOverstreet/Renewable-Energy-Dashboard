@@ -1,11 +1,6 @@
 /*This script to fetch wind data from API, process the data, and add it to the informative boxes*/
 function callPhpScript() {
-    fetch('wind_API.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' // Set the content type to JSON
-        }
-    })
+    fetch(`${API_BASE_URL}/wind`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

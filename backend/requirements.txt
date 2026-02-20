@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+pymysql
+pytz
+httpx
+aiofiles
