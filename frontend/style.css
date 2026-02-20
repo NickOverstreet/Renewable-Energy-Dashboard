@@ -120,7 +120,8 @@
 .dateRangeSelector input[type="date"] {
   margin-right: 15px; /* Add space between the end date input and the update button */
 }
-#updateChart {
+#updateChart,
+#resetChart {
   margin-left: 10px;
   padding: 5px 10px;
   cursor: pointer;

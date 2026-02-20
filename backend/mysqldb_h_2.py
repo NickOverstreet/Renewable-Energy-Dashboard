@@ -6,13 +6,13 @@ import logging
 import pytz
 import signal
 import sys
-from config import servername, username, password, dbname, url, token
+from config import DB_HOST as servername, DB_USER as username, DB_PASSWORD as password, DB_NAME as dbname, WIND_API_URL as url, WIND_API_TOKEN as token, LOG_FILE_INGESTION
 
 # JSON URL (solar)
 json_url = "https://m.lkeportal.com/publicsolarbatch/ESS.json"
 
 logging.basicConfig(
-    filename="/home/ec2-user/logs/renewable_data_3.log",
+    filename=LOG_FILE_INGESTION,
     level=logging.INFO,
     format="%(asctime)s:%(levelname)s:%(message)s",
 )

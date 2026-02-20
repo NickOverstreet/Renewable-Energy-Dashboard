@@ -16,18 +16,6 @@ python-db-scripts/config.py
 current/python-db-scripts/config.py
 backend/config.py
 
-# dashboard script config files (both old and current paths)
-dashboard-scripts/config/DB/dbConfig.php
-dashboard-scripts/config/API/ConfigAPI.php
-current/dashboard-scripts/config/DB/dbConfig.php
-current/dashboard-scripts/config/API/configAPI.php
-
-# old dashboard scripts
-dashboard-old-scripts/config/DB/dbConfig.php
-dashboard-old-scripts/config/API/ConfigAPI.php
-current/dashboard-old-scripts/config/DB/dbConfig.php
-current/dashboard-old-scripts/config/API/ConfigAPI.php
-
 # macOS metadata
 .DS_Store
 **.DS_Store

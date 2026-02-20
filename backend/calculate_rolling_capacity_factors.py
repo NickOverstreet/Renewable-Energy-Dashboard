@@ -2,7 +2,7 @@ import pymysql
 from datetime import datetime, timezone
 import logging
 import time
-from config import servername, username, password, dbname
+from config import DB_HOST as servername, DB_USER as username, DB_PASSWORD as password, DB_NAME as dbname, LOG_FILE_CAPACITY
 
 
 # Nameplate capacities (MW)
@@ -16,7 +16,7 @@ WIND_CAPACITY_MW = 0.09
 SAMPLE_INTERVAL_SECONDS = 5.0
 
 logging.basicConfig(
-    filename="/home/ec2-user/logs/capacity_factor.log",
+    filename=LOG_FILE_CAPACITY,
     level=logging.INFO,
     format="%(asctime)s:%(levelname)s:%(message)s",
 )

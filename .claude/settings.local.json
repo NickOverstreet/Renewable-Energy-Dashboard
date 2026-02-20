@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/c/repos/UKY/test-dashboard/Renewable-Energy-Dashboard/.venv/Scripts/pip install:*)",
+      "Bash(mysql:*)",
+      "Bash(1:*)"
+    ]
+  }
+}

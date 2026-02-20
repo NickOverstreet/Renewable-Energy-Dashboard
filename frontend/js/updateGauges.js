@@ -135,5 +135,5 @@ function updateGauges(check) {
     })
     .catch((error) => console.error("Error fetching gauge data:", error));
 }
-// Set up interval to update gauges every 60 seconds
-setInterval(() => updateGauges(checkIfTodaySelected(endDate)), 1000);
+// Set up interval to update gauges every 5 seconds
+setInterval(() => updateGauges(checkIfTodaySelected(endDate)), 5000);

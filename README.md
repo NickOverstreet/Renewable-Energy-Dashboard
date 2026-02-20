@@ -1,238 +1,196 @@
-# Renewable-Energy-Dashboard
+# Renewable Energy Dashboard
 
-Enhanced an existing renewable-generation dashboard for our CS Capstone Project.
-
-## Configuration Setup (Required)
-
-This repository does not commit files containing sensitive data (API tokens, database credentials).
-
-1\. Copy each `.example.php/py` config file and remove `.example` from the name.
-
-2\. Fill in the required values using credentials provided by the client or your own local DB (explained below).
-
-## Run dashboard locally
-
-### Prereqs
-
-- PHP 8+ with curl enabled
-
-- Python 3
+A live-streaming renewable energy dashboard for PPL R&D's Renewable Integration Research Facility. Displays real-time and historical data from solar, wind, hydro, and battery systems using a Python/FastAPI backend and a vanilla JS frontend.
 
 ---
 
-## Steps
-
-1\. **Create API config**
-
-   Copy example config files and add your DB credentials or API URL + token:
-
-   - From `dashboard-scripts/config/API/ConfigAPIExample.php`
-
-   - Create `dashboard-scripts/config/API/ConfigAPI.php`
-
----
-
-2\. **Install MySQL**  
-
-   Download MySQL 8.0:  
-
-   https://dev.mysql.com/downloads/mysql/8.0.html
-
-   - The installer will prompt you for passwords.
-
-   - When asked to enter a password for the database **"root"** user:
-
-     - This is the MySQL root password you will use in later steps.
-
-     - This is **not** your computer's system password.
-
----
-
-3\. **Install MySQL Workbench**  
-
-   Download MySQL Workbench:  
-
-   https://dev.mysql.com/downloads/workbench/
-
-   - Make sure MySQL is running on your machine.
-
-   - Open MySQL Workbench.
-
-   - Select **Local Instance 3306** and enter the root password.
-
-   - Open a new SQL query tab (click the "+" icon or _File → New Query Tab_).
-
-Run the following SQL commands:
-
-```sql
-
-   CREATE DATABASE renewables;
-
-   USE renewables;
-
-   CREATE TABLE historical_data (
-
-       id INT NOT NULL AUTO_INCREMENT,
-
-       date_time DATETIME NOT NULL,
-
-       solar_percentage FLOAT,
-
-       wind_percentage FLOAT,
-
-       hydro_percentage FLOAT,
-
-       battery_percentage FLOAT,
-
-       solar_fixed_percentage FLOAT,
-
-       solar_360_percentage FLOAT,
-
-       solar_generation FLOAT,
-
-       hydro_generation FLOAT,
-
-       PRIMARY KEY (id, date_time),
-
-       INDEX (date_time)
-
-   )
-
-   PARTITION BY RANGE (YEAR(date_time)) (
-
-       PARTITION p2016 VALUES LESS THAN (2017),
-
-       PARTITION p2017 VALUES LESS THAN (2018),
-
-       PARTITION p2018 VALUES LESS THAN (2019),
-
-       PARTITION p2019 VALUES LESS THAN (2020),
-
-       PARTITION p2020 VALUES LESS THAN (2021),
-
-       PARTITION p2021 VALUES LESS THAN (2022),
-
-       PARTITION p2022 VALUES LESS THAN (2023),
-
-       PARTITION p2023 VALUES LESS THAN (2024),
-
-       PARTITION p2024 VALUES LESS THAN (2025),
-
-       PARTITION p2025 VALUES LESS THAN (2026),
-
-       PARTITION p2026 VALUES LESS THAN (2027),
-
-       PARTITION p2027 VALUES LESS THAN (2028),
-
-       PARTITION p2028 VALUES LESS THAN (2029),
-
-       PARTITION p2029 VALUES LESS THAN (2030),
-
-       PARTITION p2030 VALUES LESS THAN (2031)
-
-   );
-```
-
-   - Open another SQL query tab.
-
-Run the following SQL commands:
-
-```sql
-
-   CREATE TABLE capacity_factor_history (
-
-       PARTITION p2016 VALUES LESS THAN (2017),
-
-       id INT NOT NULL AUTO_INCREMENT,
-
-       date_time DATETIME NOT NULL,
-
-       solar_capacity_factor_7d FLOAT DEFAULT NULL,
-
-       hydro_capacity_factor_7d FLOAT DEFAULT NULL,
-
-       PRIMARY KEY (id, date_time),
-
-       INDEX (date_time)
-
-  ) ENGINE=InnoDB;
+## Project Structure
 
 ```
+Renewable-Energy-Dashboard/
+├── backend/
+│   ├── app.py                              # FastAPI app, startup cache refresh task
+│   ├── cache.py                            # Shared in-memory cache (solar + wind)
+│   ├── database.py                         # MySQL connection helper
+│   ├── mysqldb_h_2.py                      # Data ingestion script (APIs → DB, every 5s)
+│   ├── calculate_rolling_capacity_factors.py  # Capacity factor script (DB → DB, every 5min)
+│   ├── config.py                           # Credentials — gitignored, do not commit
+│   ├── configExample.py                    # Template for config.py
+│   ├── requirements.txt
+│   └── routers/
+│       ├── energy.py                       # GET /data, GET /capacity-factors
+│       ├── solar.py                        # GET /solar
+│       └── wind.py                         # GET /wind
+├── frontend/
+│   ├── index.html
+│   ├── style.css
+│   └── js/
+│       ├── config.js                       # API base URL
+│       ├── gauge.js                        # Gauge chart rendering
+│       ├── updateGauges.js                 # Real-time gauge polling (every 5s)
+│       ├── timeSeries.js                   # Historical time series chart
+│       ├── rollingCapacityFactors.js       # 7-day capacity factor display
+│       └── Wind_API.js                     # Wind data display
+└── .venv/                                  # Virtual environment (gitignored)
+```
 
-4\. **Edit dbConfig.php (PHP config)**
+---
 
-Located under dashboard-scripts.
+## Setup
 
-- Set servername to "localhost"
+### 1. Create `backend/config.py`
 
-- Set username to "root"
+Copy the example and fill in your credentials:
 
-- Set password to your MySQL root password
+```
+backend/configExample.py  →  backend/config.py
+```
 
-- Set dbname to "renewables"
+**Database credentials** — set to `localhost` for local development, or your RDS endpoint for production. To switch between them, comment/uncomment the relevant block in `config.py`:
 
-5\. **Edit config.py** (Python config)\*\*
+```python
+# Production (RDS)
+# DB_HOST = 'your_rds_endpoint'
+# DB_USER = 'your_db_user'
+# DB_PASSWORD = 'your_db_password'
+# DB_NAME = 'renewables'
 
-Located under python-db-scripts.
+# Local
+DB_HOST = 'localhost'
+DB_USER = 'root'
+DB_PASSWORD = 'your_mysql_root_password'
+DB_NAME = 'renewables'
+```
 
-- Set servername to "localhost"
+**API credentials** — provided by the client:
 
-- Set username to "root"
+```python
+WIND_API_URL   = 'your_wind_api_url'
+WIND_API_TOKEN = 'Token your_wind_api_token'  # include the "Token " prefix
 
-- Set password to your MySQL root password
+SOLAR_JSON_URL = 'your_solar_json_url'
+```
 
-- Set dbname to "renewables"
+---
 
-6\. **Edit mysqldb_h_2.py and calculate_rolling_capacity_factors.py (Python scripts)**
+### 2. Install MySQL
 
-Located under python-db-scripts.
+Download MySQL 8.0: https://dev.mysql.com/downloads/mysql/8.0.html
 
-Make sure to comment out the logging configuration section for both files:
+- When prompted, set a password for the `root` user — this is your `DB_PASSWORD`.
 
-```bash
-logging.basicConfig(
+Download MySQL Workbench: https://dev.mysql.com/downloads/workbench/
 
-    filename="text",
+- Open Workbench → connect to **Local Instance 3306** → enter your root password.
 
-    level=logging.INFO,
+---
 
-    format="%(asctime)s:%(levelname)s:%(message)s",
+### 3. Create the database tables
 
+Open a query tab in MySQL Workbench and run:
+
+```sql
+CREATE DATABASE renewables;
+USE renewables;
+
+CREATE TABLE historical_data (
+    id INT NOT NULL AUTO_INCREMENT,
+    date_time DATETIME NOT NULL,
+    solar_percentage FLOAT,
+    wind_percentage FLOAT,
+    hydro_percentage FLOAT,
+    battery_percentage FLOAT,
+    solar_fixed_percentage FLOAT,
+    solar_360_percentage FLOAT,
+    solar_total_generation FLOAT,
+    solar_fixed_generation FLOAT,
+    solar_dual_generation FLOAT,
+    wind_generation FLOAT,
+    hydro_generation FLOAT,
+    PRIMARY KEY (id, date_time),
+    INDEX (date_time)
 )
+PARTITION BY RANGE (YEAR(date_time)) (
+    PARTITION p2016 VALUES LESS THAN (2017),
+    PARTITION p2017 VALUES LESS THAN (2018),
+    PARTITION p2018 VALUES LESS THAN (2019),
+    PARTITION p2019 VALUES LESS THAN (2020),
+    PARTITION p2020 VALUES LESS THAN (2021),
+    PARTITION p2021 VALUES LESS THAN (2022),
+    PARTITION p2022 VALUES LESS THAN (2023),
+    PARTITION p2023 VALUES LESS THAN (2024),
+    PARTITION p2024 VALUES LESS THAN (2025),
+    PARTITION p2025 VALUES LESS THAN (2026),
+    PARTITION p2026 VALUES LESS THAN (2027),
+    PARTITION p2027 VALUES LESS THAN (2028),
+    PARTITION p2028 VALUES LESS THAN (2029),
+    PARTITION p2029 VALUES LESS THAN (2030),
+    PARTITION p2030 VALUES LESS THAN (2031)
+);
+
+CREATE TABLE capacity_factor_history (
+    id INT NOT NULL AUTO_INCREMENT,
+    date_time DATETIME NOT NULL,
+    solar_total_capacity_factor_7d FLOAT DEFAULT NULL,
+    solar_fixed_capacity_factor_7d FLOAT DEFAULT NULL,
+    solar_dual_capacity_factor_7d FLOAT DEFAULT NULL,
+    hydro_capacity_factor_7d FLOAT DEFAULT NULL,
+    wind_capacity_factor_7d FLOAT DEFAULT NULL,
+    PRIMARY KEY (id, date_time),
+    INDEX (date_time)
+) ENGINE=InnoDB;
 ```
 
-7\. **Start the PHP server**
-
-- Open one terminal and run:
-
-```bash
-php -S localhost:8000 -t dashboard-scripts
-```
-
-- Open another terminal and run:
-
-```bash
-python3 mysqldb_h_2.py
-```
-
-- Open another terminal and run:
-
-```bash
-python3 calculate_rolling_capacity_factors.py
-```
-
-- Let the project run for a few seconds so it can gather data.
-
-- In MySQL Workbench, open a new SQL query tab and run:
+Verify data is flowing after starting the ingestion script:
 
 ```sql
 SELECT * FROM historical_data LIMIT 5;
 ```
 
-- This confirms the database is working and data has been inserted.
+---
 
-8\. **Open the dashboard**
+### 4. Create the virtual environment
+
+From the project root:
 
 ```bash
-http://localhost:8000/index.php
+python -m venv .venv
+
+# Windows
+.venv\Scripts\activate
+
+# macOS / Linux
+source .venv/bin/activate
+
+pip install -r backend/requirements.txt
+```
+
+---
+
+## Running
+
+Open a separate terminal for each process (activate the venv in each).
+
+**Terminal 1 — FastAPI server + frontend:**
+
+```bash
+uvicorn app:app --app-dir backend --reload
+```
+
+**Terminal 2 — Data ingestion** (fetches solar + wind APIs → writes to DB every 5 seconds):
+
+```bash
+python backend/mysqldb_h_2.py
+```
+
+**Terminal 3 — Capacity factor calculator** (calculates 7-day rolling capacity factors → writes to DB every 5 minutes):
+
+```bash
+python backend/calculate_rolling_capacity_factors.py
+```
+
+Let the ingestion script run for a few seconds, then open the dashboard:
+
+```
+http://localhost:8000
 ```

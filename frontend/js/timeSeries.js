@@ -194,6 +194,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  function resetToDefault() {
+    const today = new Date();
+    const todayFormatted = today.toISOString().split("T")[0];
+    const oneDayNH = new Date();
+    oneDayNH.setHours(oneDayNH.getHours() - 36);
+
+    startDate = oneDayNH.toISOString().split("T")[0];
+    startTime = oneDayNH.toISOString().split("T")[1].slice(0, 8);
+    endDate = todayFormatted;
+
+    datePicker.clear();
+    datePicker.set("maxDate", "today");
+    fetchData(startDate, endDate, startTime);
+  }
+
+  document.getElementById("resetChart").addEventListener("click", resetToDefault);
+
   // Get today's date
   const today = new Date();
   const todayFormatted = today.toISOString().split("T")[0];

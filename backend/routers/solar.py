@@ -1,17 +1,14 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
-import httpx
-from config import SOLAR_JSON_URL
+import cache
 
 router = APIRouter()
 
 
 @router.get("/solar")
 async def get_solar_data():
-    async with httpx.AsyncClient() as client:
-        response = await client.get(SOLAR_JSON_URL, timeout=10.0)
-    if response.status_code != 200:
-        raise HTTPException(status_code=response.status_code, detail="Solar API error")
+    if cache.store["solar"] is None:
+        raise HTTPException(status_code=503, detail="Solar data not yet available")
     # Pass raw bytes through — the upstream server returns concatenated JSON
     # objects that Python's strict parser rejects but browsers handle fine.
-    return Response(content=response.content, media_type="application/json")
+    return Response(content=cache.store["solar"], media_type="application/json")
