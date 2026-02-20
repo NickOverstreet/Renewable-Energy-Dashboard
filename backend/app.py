@@ -54,7 +54,11 @@ async def refresh_cache():
             try:
                 r = await client.get(SOLAR_JSON_URL, timeout=5.0)
                 if r.status_code == 200:
-                    cache.store["solar"] = r.content
+                    try:
+                        json.loads(r.content)  # validate JSON before caching — discard truncated/malformed responses
+                        cache.store["solar"] = r.content
+                    except Exception:
+                        pass  # keep the previous cached value if the response is malformed
             except Exception:
                 pass
 

@@ -2,6 +2,13 @@
 
 A live-streaming renewable energy dashboard for PPL R&D's Renewable Integration Research Facility. Displays real-time and historical data from solar, wind, hydro, and battery systems using a Python/FastAPI backend and a vanilla JS frontend.
 
+This is a rewrite of the original PHP-based dashboard. The motivation for the rewrite:
+
+- **Faster responses** — Solar and wind API data is fetched server-side every 5 seconds and served from an in-memory cache, reducing `/solar` and `/wind` response times from ~200ms to under 5ms.
+- **Simpler operations** — The original version required three separate processes running simultaneously (web server, data ingestion script, capacity factor script). This version runs everything in a single `uvicorn` process with background tasks, managed by one systemd service.
+- **One language** — All backend logic is in Python. The original version mixed PHP for the web layer with Python scripts for data pipelines.
+- **Auto-generated API docs** — FastAPI provides interactive documentation at `/docs`, making the API easier to understand and test.
+
 ---
 
 ## Project Structure
