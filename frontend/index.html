@@ -10,13 +10,15 @@
     <link rel="shortcut icon" href="assets/images/faviconv2.svg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="js/config.js" defer></script>
-    <script src="js/gauge.js" defer></script>
-    <script src="js/updateGauges.js" defer></script>
-    <script src="js/timeSeries.js" defer></script>
-    <script src="js/Wind_API.js" defer></script>
-    <script src="js/rollingCapacityFactors.js" defer></script>
+    <script src="js/config.js?v=2" defer></script>
+    <script src="js/gauge.js?v=2" defer></script>
+    <script src="js/updateGauges.js?v=2" defer></script>
+    <script src="js/timeSeries.js?v=2" defer></script>
+    <script src="js/Wind_API.js?v=2" defer></script>
+    <script src="js/rollingCapacityFactors.js?v=2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2/dist/jspdf.umd.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js" defer></script>
 </head>
 
 <body style="background-color: #FFFFFF">
@@ -52,6 +54,20 @@
                 <input type="text" id="datePicker" placeholder="Select date range" readonly>
                 <button id="updateChart">Update Chart</button>
                 <button id="resetChart">Reset</button>
+            </div>
+            <div id="exportDropdown" class="export-dropdown">
+                <button id="exportBtn">Export &#9660;</button>
+                <div class="export-menu" id="exportMenu">
+                    <div class="export-item" id="exportFullscreen">View in full screen</div>
+                    <div class="export-item" id="exportPrint">Print chart</div>
+                    <div class="export-separator"></div>
+                    <div class="export-item" id="exportCSV">Download CSV</div>
+                    <div class="export-item" id="exportXLS">Download XLSX</div>
+                    <div class="export-separator"></div>
+                    <div class="export-item" id="exportPNG">Download PNG image</div>
+                    <div class="export-item" id="exportJPEG">Download JPEG image</div>
+                    <div class="export-item" id="exportPDF">Download PDF document</div>
+                </div>
             </div>
             <div id="timeSeriesContainer"></div>
         </div>

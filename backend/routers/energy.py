@@ -25,7 +25,7 @@ def get_data(
     start_utc = start_local.astimezone(utc).strftime("%Y-%m-%d %H:%M:%S")
     end_utc = end_local.astimezone(utc).strftime("%Y-%m-%d %H:%M:%S")
 
-    group_interval = 300
+    group_interval = 60
 
     sql = """
     SELECT

@@ -1,4 +1,4 @@
-/* global echarts */
+/* global echarts, XLSX */
 // Global variable to store fetched data
 let fetchedData = null;
 let startDate = null;
@@ -28,7 +28,7 @@ let chartData = {
 };
 
 // Request the data from the server through API
-async function fetchData(startDate, endDate, startTime) {
+async function fetchData(startDate, endDate, startTime, resetZoom = false) {
   try {
     const response = await fetch(
       `${API_BASE_URL}/data?startDate=${startDate}&endDate=${endDate}&startTime=${startTime}`,
@@ -44,13 +44,13 @@ async function fetchData(startDate, endDate, startTime) {
     parsedData.interval_times = parsedData.interval_times.map((time) =>
       new Date(time).getTime(),
     );
-    updateTimeSeriesChart(parsedData);
+    updateTimeSeriesChart(parsedData, resetZoom);
   } catch (error) {
     console.error("Error fetching data:", error);
   }
 }
 
-function updateTimeSeriesChart(data) {
+function updateTimeSeriesChart(data, resetZoom = false) {
   if (!data || !timeSeriesChart) return;
 
   const timestamps = data.interval_times;
@@ -62,7 +62,7 @@ function updateTimeSeriesChart(data) {
   chartData.solarFixed = data.solarFixed.map((val, i) => [timestamps[i], val]);
   chartData.solar360   = data.solar360.map((val, i) => [timestamps[i], val]);
 
-  timeSeriesChart.setOption({
+  const option = {
     series: [
       { data: chartData.solar },
       { data: chartData.wind },
@@ -71,7 +71,11 @@ function updateTimeSeriesChart(data) {
       { data: chartData.solarFixed },
       { data: chartData.solar360 },
     ],
-  });
+  };
+  if (resetZoom) {
+    option.dataZoom = [{ start: 0, end: 100 }];
+  }
+  timeSeriesChart.setOption(option);
 
   // Give gauges initial values
   if (!gaugesInitialized) {
@@ -118,6 +122,16 @@ function addRealTimeDataToChart() {
 
 document.addEventListener("DOMContentLoaded", () => {
   timeSeriesChart = createTimeSeriesChart();
+
+  const resetBtn = document.getElementById("resetChart");
+  function showReset() { resetBtn.style.display = "inline-block"; }
+  function hideReset() { resetBtn.style.display = "none"; }
+
+  // Show reset button whenever the user zooms the chart (wheel or pinch)
+  let suppressZoomEvent = false;
+  document.getElementById("timeSeriesContainer").addEventListener("wheel", () => {
+    if (!suppressZoomEvent) showReset();
+  }, { passive: true });
 
   // Initialize flatpickr with range mode for date selection
   const datePicker = flatpickr("#datePicker", {
@@ -175,7 +189,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       if (startDate && endDate) {
-        await fetchData(startDate, endDate, "00:00:00"); // Fetch and update chart with the selected date range
+        await fetchData(startDate, endDate, "00:00:00", true); // Fetch and update chart with the selected date range
+        showReset();
       } else {
         alert("Please select a valid date range.");
       }
@@ -197,15 +212,36 @@ document.addEventListener("DOMContentLoaded", () => {
     startTime = oneDayNH.toISOString().split("T")[1].slice(0, 8);
     endDate = todayFormatted;
 
+    hideReset();
     datePicker.clear();
     datePicker.set("maxDate", "today");
     if (timeSeriesChart) {
+      suppressZoomEvent = true;
       timeSeriesChart.dispatchAction({ type: "dataZoom", start: 0, end: 100 });
+      suppressZoomEvent = false;
     }
     fetchData(startDate, endDate, startTime);
   }
 
   document.getElementById("resetChart").addEventListener("click", resetToDefault);
+
+  // Export dropdown
+  const exportBtn  = document.getElementById("exportBtn");
+  const exportMenu = document.getElementById("exportMenu");
+  exportBtn.addEventListener("click", (e) => { e.stopPropagation(); exportMenu.classList.toggle("open"); });
+  document.addEventListener("click", () => exportMenu.classList.remove("open"));
+  const exportActions = {
+    exportFullscreen: viewFullscreen,
+    exportPrint:      printChart,
+    exportCSV:        downloadCSV,
+    exportXLS:        downloadXLS,
+    exportPNG:        downloadPNG,
+    exportJPEG:       downloadJPEG,
+    exportPDF:        downloadChartAsPDF,
+  };
+  Object.entries(exportActions).forEach(([id, fn]) => {
+    document.getElementById(id).addEventListener("click", () => { fn(); exportMenu.classList.remove("open"); });
+  });
 
   // Get today's date
   const today = new Date();
@@ -235,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchData(startDate, endDate, startTime);
     setInterval(() => {
       fetchData(startDate, endDate, startTime);
-    }, 5 * 60 * 1000);
+    }, 60 * 1000);
   }, msUntilNextFiveMinutes());
 });
 
@@ -319,23 +355,117 @@ function createTimeSeriesChart() {
     dataZoom: [
       { type: "inside", xAxisIndex: 0 }, // scroll wheel / pinch zoom
     ],
-    toolbox: {
-      right: 10,
-      top: 5,
-      feature: {
-        saveAsImage: { title: "Download PNG" },
-      },
-    },
     series: [
-      { name: "Solar",          type: "line", data: [], color: "#fe6a35", symbol: "circle", symbolSize: 4, lineStyle: { width: 2 } },
-      { name: "Wind",           type: "line", data: [], color: "#2caffe", symbol: "circle", symbolSize: 4, lineStyle: { width: 2 } },
-      { name: "Hydro",          type: "line", data: [], color: "navy",    symbol: "circle", symbolSize: 4, lineStyle: { width: 2 } },
-      { name: "Battery",        type: "line", data: [], color: "#24d63b", symbol: "circle", symbolSize: 4, lineStyle: { width: 2 } },
-      { name: "Fixed Solar",    type: "line", data: [], color: "#ffc247", symbol: "circle", symbolSize: 4, lineStyle: { width: 2 } },
-      { name: "Dual Axis Solar",type: "line", data: [], color: "#d11717", symbol: "circle", symbolSize: 4, lineStyle: { width: 2 } },
+      { name: "Solar",          type: "line", data: [], color: "#fe6a35", symbol: "none", lineStyle: { width: 2 } },
+      { name: "Wind",           type: "line", data: [], color: "#2caffe", symbol: "none", lineStyle: { width: 2 } },
+      { name: "Hydro",          type: "line", data: [], color: "navy",    symbol: "none", lineStyle: { width: 2 } },
+      { name: "Battery",        type: "line", data: [], color: "#24d63b", symbol: "none", lineStyle: { width: 2 } },
+      { name: "Fixed Solar",    type: "line", data: [], color: "#ffc247", symbol: "none", lineStyle: { width: 2 } },
+      { name: "Dual Axis Solar",type: "line", data: [], color: "#d11717", symbol: "none", lineStyle: { width: 2 } },
     ],
   });
 
   window.addEventListener("resize", () => chart.resize());
+  document.addEventListener("fullscreenchange", () => {
+    if (!chart) return;
+    chart.resize();
+    const isFullscreen = !!document.fullscreenElement;
+    chart.setOption({ backgroundColor: isFullscreen ? "#ffffff" : "transparent" });
+  });
   return chart;
+}
+
+// ── Export helpers ────────────────────────────────────────────────────────────
+
+function triggerDownload(url, filename) {
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+}
+
+function downloadPNG() {
+  if (!timeSeriesChart) return;
+  triggerDownload(
+    timeSeriesChart.getDataURL({ type: "png", pixelRatio: 2, backgroundColor: "#fff" }),
+    "renewable-energy-chart.png"
+  );
+}
+
+function downloadJPEG() {
+  if (!timeSeriesChart) return;
+  triggerDownload(
+    timeSeriesChart.getDataURL({ type: "jpeg", pixelRatio: 2, backgroundColor: "#fff" }),
+    "renewable-energy-chart.jpg"
+  );
+}
+
+function downloadChartAsPDF() {
+  if (!timeSeriesChart) return;
+  const dataURL = timeSeriesChart.getDataURL({ type: "png", pixelRatio: 2, backgroundColor: "#fff" });
+  const { jsPDF } = window.jspdf;
+  const img = new Image();
+  img.onload = function () {
+    const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    const pageWidth  = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const ratio = Math.min(pageWidth / img.width, pageHeight / img.height);
+    const imgW  = img.width  * ratio;
+    const imgH  = img.height * ratio;
+    pdf.addImage(dataURL, "PNG", (pageWidth - imgW) / 2, (pageHeight - imgH) / 2, imgW, imgH);
+    pdf.save("renewable-energy-chart.pdf");
+  };
+  img.src = dataURL;
+}
+
+function downloadCSV() {
+  if (!chartData.solar.length) return;
+  const headers = ["Timestamp (EST)", "Solar (%)", "Wind (%)", "Hydro (%)", "Battery (%)", "Fixed Solar (%)", "Dual Axis Solar (%)"];
+  const rows = chartData.solar.map((_, i) => {
+    const ts = new Date(chartData.solar[i][0]).toLocaleString("en-US", { timeZone: "America/New_York" });
+    return [ts, chartData.solar[i][1], chartData.wind[i][1], chartData.hydro[i][1],
+            chartData.battery[i][1], chartData.solarFixed[i][1], chartData.solar360[i][1]].join(",");
+  });
+  const blob = new Blob([[headers.join(","), ...rows].join("\n")], { type: "text/csv" });
+  triggerDownload(URL.createObjectURL(blob), "renewable-energy-data.csv");
+}
+
+function downloadXLS() {
+  if (!chartData.solar.length) return;
+  const rows = [
+    ["Timestamp (EST)", "Solar (%)", "Wind (%)", "Hydro (%)", "Battery (%)", "Fixed Solar (%)", "Dual Axis Solar (%)"],
+  ];
+  chartData.solar.forEach((_, i) => {
+    const ts = new Date(chartData.solar[i][0]).toLocaleString("en-US", { timeZone: "America/New_York" });
+    rows.push([
+      ts,
+      chartData.solar[i][1],
+      chartData.wind[i][1],
+      chartData.hydro[i][1],
+      chartData.battery[i][1],
+      chartData.solarFixed[i][1],
+      chartData.solar360[i][1],
+    ]);
+  });
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, "Renewable Energy Data");
+  XLSX.writeFile(wb, "renewable-energy-data.xlsx");
+}
+
+function viewFullscreen() {
+  const el = document.getElementById("timeSeriesContainer");
+  if (el.requestFullscreen) el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+}
+
+function printChart() {
+  if (!timeSeriesChart) return;
+  const dataURL = timeSeriesChart.getDataURL({ type: "png", pixelRatio: 2, backgroundColor: "#fff" });
+  const win = window.open("");
+  const img = win.document.createElement("img");
+  img.src = dataURL;
+  img.style.maxWidth = "100%";
+  img.onload = () => { win.print(); win.close(); };
+  win.document.body.appendChild(img);
 }

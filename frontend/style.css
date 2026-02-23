@@ -72,6 +72,11 @@
   border-radius: 6px;
 }
 
+#timeSeriesContainer:fullscreen,
+#timeSeriesContainer:-webkit-full-screen {
+  background-color: #ffffff;
+}
+
 /* Container for both date range selector and time series chart */
 #chartContainer {
   width: 99%;
@@ -100,6 +105,61 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.export-dropdown {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+}
+
+#exportBtn {
+  padding: 5px 10px;
+  cursor: pointer;
+  background-color: rgba(237, 237, 237, 0.95);
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: "Roboto", Arial, sans-serif;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.export-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 11;
+  overflow: hidden;
+}
+
+.export-menu.open {
+  display: block;
+}
+
+.export-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: "Roboto", Arial, sans-serif;
+  font-size: 14px;
+  color: #298fc2;
+}
+
+.export-item:hover {
+  background-color: #f0f7ff;
+}
+
+.export-separator {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 2px 0;
+}
+
 .date-label {
   /* Style for "Select Data Range" */
   font-family: "Roboto", Arial, sans-serif; /* Change Font */
@@ -126,6 +186,10 @@
   padding: 5px 10px;
   cursor: pointer;
   white-space: nowrap;
+}
+
+#resetChart {
+  display: none;
 }
 
 #updateChart:disabled {
