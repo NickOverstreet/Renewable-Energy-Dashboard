@@ -32,10 +32,10 @@ function updateGauges(check) {
       const totalPower = batteryPower + GenerationSNegative + GenerationH + GenerationW;
       const COR = 1.738 * totalPower;
 
-      createGaugeChart(SolarGen, "solarGauge");
-      createGaugeChart(WindGen, "windGauge");
-      createGaugeChart(HydroGen, "hydroGauge");
-      createGaugeChart(SOC, "batteryGauge");
+      createGaugeChart(SolarGen, "solarGauge", "Solar");
+      createGaugeChart(WindGen, "windGauge", "Wind");
+      createGaugeChart(HydroGen, "hydroGauge", "Hydro");
+      createGaugeChart(SOC, "batteryGauge", "Battery");
 
       // Timestamp
       const estTimestamp = new Date(
