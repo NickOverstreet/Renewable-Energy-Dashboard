@@ -17,7 +17,7 @@ from config import (
     DB_HOST, DB_USER, DB_PASSWORD, DB_NAME,
     LOG_FILE_INGESTION,
 )
-from routers import energy, wind, solar
+from routers import energy, live
 import cache
 
 
@@ -281,8 +281,7 @@ app.add_middleware(
 
 # API routes — must be registered before the static file mount so they take priority
 app.include_router(energy.router)
-app.include_router(wind.router)
-app.include_router(solar.router)
+app.include_router(live.router)
 
 # Serve the frontend from /  (html=True makes index.html the default for /)
 frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")

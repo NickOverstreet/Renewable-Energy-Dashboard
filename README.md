@@ -25,18 +25,16 @@ Renewable-Energy-Dashboard/
 │   ├── requirements.txt
 │   └── routers/
 │       ├── energy.py                       # GET /data, GET /capacity-factors
-│       ├── solar.py                        # GET /solar
-│       └── wind.py                         # GET /wind
+│       └── live.py                         # GET /live (facility + wind real-time data)
 ├── frontend/
 │   ├── index.html
 │   ├── style.css
 │   └── js/
 │       ├── config.js                       # API base URL
 │       ├── gauge.js                        # Gauge chart rendering
-│       ├── updateGauges.js                 # Real-time gauge polling (every 5s)
+│       ├── updateGauges.js                 # Real-time gauge + grid polling (every 5s)
 │       ├── timeSeries.js                   # Historical time series chart
-│       ├── rollingCapacityFactors.js       # 7-day capacity factor display
-│       └── Wind_API.js                     # Wind data display
+│       └── rollingCapacityFactors.js       # 7-day capacity factor display
 └── .venv/                                  # Virtual environment — local dev only, gitignored
 ```
 

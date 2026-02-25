@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Hydro | RIRF</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="assets/images/faviconv2.svg">
+    <link rel="shortcut icon" href="assets/images/faviconv2.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="js/config.js?v=3" defer></script>
+    <script src="js/nav.js?v=1" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js" defer></script>
+</head>
+
+<body>
+    <div class="layout">
+
+        <!-- Sidebar navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-brand">
+                <img src="assets/images/faviconv2.svg" alt="RIRF" class="sidebar-logo">
+                <span class="sidebar-name">Renewable Integration<br>Research Facility</span>
+            </div>
+            <ul class="sidebar-links">
+                <li><a href="/" class="nav-link"><span class="nav-label">Overview</span></a></li>
+                <li><a href="/wind.html" class="nav-link"><span class="nav-label">Wind</span></a></li>
+                <li><a href="/solar.html" class="nav-link"><span class="nav-label">Solar</span></a></li>
+                <li><a href="/hydro.html" class="nav-link"><span class="nav-label">Hydro</span></a></li>
+                <li><a href="/battery.html" class="nav-link"><span class="nav-label">Battery</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Hydro</h1>
+                <div class="lastUpdatedContainer">
+                    <span class="lastUpdatedLabel">Last updated (EST): </span>
+                    <span id="lastUpdated">--</span>
+                </div>
+            </div>
+
+            <div class="page-body">
+
+                <!-- Date range control -->
+                <div class="date-bar">
+                    <label class="date-label">Select Date Range:</label>
+                    <input type="text" id="datePicker" placeholder="Select date range" readonly>
+                    <button id="updateChart">Update</button>
+                    <button id="resetChart">Reset</button>
+                </div>
+
+                <!-- Live stat cards — populated every 5s from /live/facility -->
+                <div class="stat-row">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Hydro Power</div>
+                        <div class="stat-value" id="statHydroTotal">-- kW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Dix Dam Unit 1</div>
+                        <div class="stat-value" id="statDix1">-- MW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Dix Dam Unit 2</div>
+                        <div class="stat-value" id="statDix2">-- MW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Dix Dam Unit 3</div>
+                        <div class="stat-value" id="statDix3">-- MW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">7-Day Capacity Factor</div>
+                        <div class="stat-value" id="statHydroCF7d">--%</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <p class="chart-card-title">Hydro Generation vs. Rainfall Over Time</p>
+                        <div class="chart-placeholder" id="chartHydroRainfall">Chart coming soon</div>
+                    </div>
+                </div>
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <p class="chart-card-title">Dix Dam Unit Output Over Time</p>
+                        <div class="chart-placeholder" id="chartDixUnits">Chart coming soon</div>
+                    </div>
+                    <div class="chart-card">
+                        <p class="chart-card-title">Hydro Capacity Factor Over Time</p>
+                        <div class="chart-placeholder" id="chartHydroCF">Chart coming soon</div>
+                    </div>
+                </div>
+
+            </div><!-- end .page-body -->
+        </div><!-- end .main-content -->
+
+    </div><!-- end .layout -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function updateHydroStats() {
+                fetch(`${API_BASE_URL}/live/facility`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const f = data.facility[0];
+
+                        document.getElementById('statHydroTotal').textContent = f['Hydro Generation (kW)'].toFixed(2) + ' kW';
+                        document.getElementById('statDix1').textContent       = f['Dix 1 Hydro Generation (MW)'].toFixed(2) + ' MW';
+                        document.getElementById('statDix2').textContent       = f['Dix 2 Hydro Generation (MW)'].toFixed(2) + ' MW';
+                        document.getElementById('statDix3').textContent       = f['Dix 3 Hydro Generation (MW)'].toFixed(2) + ' MW';
+                        document.getElementById('lastUpdated').textContent    = f['Time'];
+                    })
+                    .catch(err => console.error('Facility fetch error:', err));
+
+                fetch(`${API_BASE_URL}/capacity-factors`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.hydro_capacity_factor_7d !== null)
+                            document.getElementById('statHydroCF7d').textContent =
+                                data.hydro_capacity_factor_7d.toFixed(2) + '%';
+                    })
+                    .catch(err => console.error('CF fetch error:', err));
+            }
+
+            updateHydroStats();
+            setInterval(updateHydroStats, 5000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Solar | RIRF</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="assets/images/faviconv2.svg">
+    <link rel="shortcut icon" href="assets/images/faviconv2.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="js/config.js?v=3" defer></script>
+    <script src="js/nav.js?v=1" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js" defer></script>
+</head>
+
+<body>
+    <div class="layout">
+
+        <!-- Sidebar navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-brand">
+                <img src="assets/images/faviconv2.svg" alt="RIRF" class="sidebar-logo">
+                <span class="sidebar-name">Renewable Integration<br>Research Facility</span>
+            </div>
+            <ul class="sidebar-links">
+                <li><a href="/" class="nav-link"><span class="nav-label">Overview</span></a></li>
+                <li><a href="/wind.html" class="nav-link"><span class="nav-label">Wind</span></a></li>
+                <li><a href="/solar.html" class="nav-link"><span class="nav-label">Solar</span></a></li>
+                <li><a href="/hydro.html" class="nav-link"><span class="nav-label">Hydro</span></a></li>
+                <li><a href="/battery.html" class="nav-link"><span class="nav-label">Battery</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Solar</h1>
+                <div class="lastUpdatedContainer">
+                    <span class="lastUpdatedLabel">Last updated (EST): </span>
+                    <span id="lastUpdated">--</span>
+                </div>
+            </div>
+
+            <div class="page-body">
+
+                <!-- Date range control -->
+                <div class="date-bar">
+                    <label class="date-label">Select Date Range:</label>
+                    <input type="text" id="datePicker" placeholder="Select date range" readonly>
+                    <button id="updateChart">Update</button>
+                    <button id="resetChart">Reset</button>
+                </div>
+
+                <!-- Live stat cards — populated every 5s from /live/facility -->
+                <div class="stat-row">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Solar Power</div>
+                        <div class="stat-value" id="statSolarTotal">-- kW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Fixed Solar Power</div>
+                        <div class="stat-value" id="statSolarFixed">-- kW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">360&deg; Tracking Power</div>
+                        <div class="stat-value" id="statSolar360">-- kW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Solar Irradiance</div>
+                        <div class="stat-value" id="statIrradiance">-- W/m&sup2;</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total 7-Day Capacity Factor</div>
+                        <div class="stat-value" id="statSolarCF7d">--%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Fixed 7-Day Capacity Factor</div>
+                        <div class="stat-value" id="statSolarFixedCF7d">--%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Dual 7-Day Capacity Factor</div>
+                        <div class="stat-value" id="statSolarDualCF7d">--%</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <p class="chart-card-title">Solar Capacity Factor vs. Irradiance</p>
+                        <div class="chart-placeholder" id="chartCFvsIrradiance">Chart coming soon</div>
+                    </div>
+                    <div class="chart-card">
+                        <p class="chart-card-title">Solar Capacity Factor vs. Temperature</p>
+                        <div class="chart-placeholder" id="chartCFvsTemp">Chart coming soon</div>
+                    </div>
+                </div>
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <p class="chart-card-title">Fixed vs. Tracking Solar Power Over Time</p>
+                        <div class="chart-placeholder" id="chartSolarComparison">Chart coming soon</div>
+                    </div>
+                </div>
+
+            </div><!-- end .page-body -->
+        </div><!-- end .main-content -->
+
+    </div><!-- end .layout -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function updateSolarStats() {
+                fetch(`${API_BASE_URL}/live/facility`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const f = data.facility[0];
+
+                        document.getElementById('statSolarTotal').textContent   = f['Solar Generation (kW)'].toFixed(2) + ' kW';
+                        document.getElementById('statSolarFixed').textContent   = f['Solar Fixed (kW)'].toFixed(2) + ' kW';
+                        document.getElementById('statSolar360').textContent     = f['Solar 360 Trackers (kW)'].toFixed(2) + ' kW';
+                        document.getElementById('statIrradiance').textContent   = f['Solar Irradiance (GHI WM2)'].toFixed(2) + ' W/m²';
+                        document.getElementById('lastUpdated').textContent      = f['Time'];
+                    })
+                    .catch(err => console.error('Facility fetch error:', err));
+
+                fetch(`${API_BASE_URL}/capacity-factors`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.solar_total_capacity_factor_7d !== null)
+                            document.getElementById('statSolarCF7d').textContent =
+                                data.solar_total_capacity_factor_7d.toFixed(2) + '%';
+                        if (data.solar_fixed_capacity_factor_7d !== null)
+                            document.getElementById('statSolarFixedCF7d').textContent =
+                                data.solar_fixed_capacity_factor_7d.toFixed(2) + '%';
+                        if (data.solar_dual_capacity_factor_7d !== null)
+                            document.getElementById('statSolarDualCF7d').textContent =
+                                data.solar_dual_capacity_factor_7d.toFixed(2) + '%';
+                    })
+                    .catch(err => console.error('CF fetch error:', err));
+            }
+
+            updateSolarStats();
+            setInterval(updateSolarStats, 5000);
+        });
+    </script>
+</body>
+</html>

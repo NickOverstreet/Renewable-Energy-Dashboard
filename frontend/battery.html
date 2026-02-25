@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Battery | RIRF</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="assets/images/faviconv2.svg">
+    <link rel="shortcut icon" href="assets/images/faviconv2.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="js/config.js?v=3" defer></script>
+    <script src="js/nav.js?v=1" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js" defer></script>
+</head>
+
+<body>
+    <div class="layout">
+
+        <!-- Sidebar navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-brand">
+                <img src="assets/images/faviconv2.svg" alt="RIRF" class="sidebar-logo">
+                <span class="sidebar-name">Renewable Integration<br>Research Facility</span>
+            </div>
+            <ul class="sidebar-links">
+                <li><a href="/" class="nav-link"><span class="nav-label">Overview</span></a></li>
+                <li><a href="/wind.html" class="nav-link"><span class="nav-label">Wind</span></a></li>
+                <li><a href="/solar.html" class="nav-link"><span class="nav-label">Solar</span></a></li>
+                <li><a href="/hydro.html" class="nav-link"><span class="nav-label">Hydro</span></a></li>
+                <li><a href="/battery.html" class="nav-link"><span class="nav-label">Battery</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Battery</h1>
+                <div class="lastUpdatedContainer">
+                    <span class="lastUpdatedLabel">Last updated (EST): </span>
+                    <span id="lastUpdated">--</span>
+                </div>
+            </div>
+
+            <div class="page-body">
+
+                <!-- Date range control -->
+                <div class="date-bar">
+                    <label class="date-label">Select Date Range:</label>
+                    <input type="text" id="datePicker" placeholder="Select date range" readonly>
+                    <button id="updateChart">Update</button>
+                    <button id="resetChart">Reset</button>
+                </div>
+
+                <!-- Live stat cards — populated every 5s from /live/facility -->
+                <div class="stat-row">
+                    <div class="stat-card">
+                        <div class="stat-label">Battery Power</div>
+                        <div class="stat-value" id="statBattPower">-- kW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Power Available</div>
+                        <div class="stat-value" id="statBattAvail">-- kW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">State of Charge</div>
+                        <div class="stat-value" id="statBattSOC">--%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">State of Health</div>
+                        <div class="stat-value" id="statBattSOH">--%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Container 1 Temp</div>
+                        <div class="stat-value" id="statBattTemp1">--&deg;C</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Container 2 Temp</div>
+                        <div class="stat-value" id="statBattTemp2">--&deg;C</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">DC Voltage</div>
+                        <div class="stat-value" id="statBattVoltage">-- V</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">DC Current</div>
+                        <div class="stat-value" id="statBattCurrent">-- A</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <p class="chart-card-title">Round-Trip Efficiency vs. Ambient Temperature</p>
+                        <div class="chart-placeholder" id="chartRTE">Chart coming soon</div>
+                    </div>
+                    <div class="chart-card">
+                        <p class="chart-card-title">State of Charge Over Time</p>
+                        <div class="chart-placeholder" id="chartSOC">Chart coming soon</div>
+                    </div>
+                </div>
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <p class="chart-card-title">Battery Power Over Time (Charge / Discharge)</p>
+                        <div class="chart-placeholder" id="chartBattPower">Chart coming soon</div>
+                    </div>
+                </div>
+
+            </div><!-- end .page-body -->
+        </div><!-- end .main-content -->
+
+    </div><!-- end .layout -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function updateBatteryStats() {
+                fetch(`${API_BASE_URL}/live/facility`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const f = data.facility[0];
+
+                        document.getElementById('statBattPower').textContent   = f['Battery Power (kW)'] + ' kW';
+                        document.getElementById('statBattAvail').textContent   = f['Battery Power Available (kW)'] + ' kW';
+                        document.getElementById('statBattSOC').textContent     = f['Battery State of Charge (SOC %)'].toFixed(1) + '%';
+                        document.getElementById('statBattSOH').textContent     = f['Battery State of Health (SOH %)'] + '%';
+                        document.getElementById('statBattTemp1').textContent   = f['Battery Container 1 Temp (C)'] + '°C';
+                        document.getElementById('statBattTemp2').textContent   = f['Battery Container 2 Temp (C)'] + '°C';
+                        document.getElementById('statBattVoltage').textContent = f['Battery DC Voltage'] + ' V';
+                        document.getElementById('statBattCurrent').textContent = f['Battery DC Current'] + ' A';
+                        document.getElementById('lastUpdated').textContent     = f['Time'];
+                    })
+                    .catch(err => console.error('Facility fetch error:', err));
+            }
+
+            updateBatteryStats();
+            setInterval(updateBatteryStats, 5000);
+        });
+    </script>
+</body>
+</html>

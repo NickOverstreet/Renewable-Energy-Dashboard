@@ -20,7 +20,7 @@
   margin: 0 auto;
   box-sizing: border-box;
   flex-grow: 1;
-  overflow: auto;
+  overflow: visible;
   position: relative;
   top: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* add shadow to the container */
@@ -343,6 +343,271 @@ h4 {
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }*/
+
+/* ── Page layout (sidebar + main content) ─────────────────────────────── */
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────── */
+
+.sidebar {
+  width: 210px;
+  flex-shrink: 0;
+  background-color: #007ab8;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.sidebar-logo {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+
+.sidebar-name {
+  color: #fff;
+  font-family: "Raleway", Arial, sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+}
+
+.sidebar-links {
+  list-style: none;
+  margin: 0;
+  padding: 10px 0;
+  flex: 1;
+}
+
+.sidebar-links li {
+  margin: 2px 8px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  border-radius: 8px;
+  font-family: "Roboto", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.nav-link.active {
+  background-color: #005a8a;
+  color: #fff;
+  font-weight: 500;
+}
+
+.nav-label {
+  white-space: nowrap;
+}
+
+/* ── Main content area ────────────────────────────────────────────────── */
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+}
+
+/* ── Asset page header ────────────────────────────────────────────────── */
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px 20px;
+  border-bottom: 2px solid #ededed;
+}
+
+.page-title {
+  font-family: "Raleway", Arial, sans-serif;
+  font-weight: 800;
+  font-size: clamp(18px, 3vw, 26px);
+  color: #001489;
+  margin: 0;
+}
+
+.page-body {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Date bar (asset pages) ───────────────────────────────────────────── */
+
+.date-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  background-color: #ededed;
+  border-radius: 10px;
+  padding: 10px 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Stat cards ───────────────────────────────────────────────────────── */
+
+.stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.stat-card {
+  flex: 1 1 150px;
+  background-color: #007ab8;
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: #fff;
+  font-family: "Roboto", Arial, sans-serif;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.85;
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* ── Chart cards ──────────────────────────────────────────────────────── */
+
+.chart-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.chart-card {
+  flex: 1 1 420px;
+  background-color: #ededed;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chart-card-title {
+  font-family: "Roboto", Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #2d2926;
+  margin: 0;
+}
+
+.chart-placeholder {
+  background-color: #d0d0d0;
+  border-radius: 8px;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+  font-family: "Roboto", Arial, sans-serif;
+  font-size: 14px;
+}
+
+/* ── Mobile: sidebar collapses to bottom tab bar ──────────────────────── */
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 60px;
+  }
+
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: 60px;
+    position: fixed;
+    bottom: 0;
+    top: auto;
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .sidebar-brand {
+    display: none;
+  }
+
+  .sidebar-links {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    width: 100%;
+  }
+
+  .sidebar-links li {
+    flex: 1;
+    margin: 0;
+  }
+
+  .nav-link {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 4px;
+    border-radius: 0;
+    font-size: 10px;
+    gap: 2px;
+    height: 100%;
+  }
+
+  .nav-link.active {
+    border-radius: 0;
+    border-top: 3px solid #fff;
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .main-content {
+    order: 1;
+  }
+}
 
 /* On screens <= 900px, collapse the column header layout
    into a single-column stack (title on top, timestamp below). */
