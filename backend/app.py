@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 import httpx
 import pymysql
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -278,6 +278,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def cache_control(request: Request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if path.endswith(".html") or path == "/":
+        response.headers["Cache-Control"] = "no-cache"
+    elif path.endswith((".svg", ".css", ".js", ".png", ".jpg")):
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    return response
+
 
 # API routes — must be registered before the static file mount so they take priority
 app.include_router(energy.router)

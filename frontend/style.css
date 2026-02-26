@@ -17,16 +17,16 @@
   align-items: flex-start;
   padding: 10px;
   width: 98%;
-  margin: 0 auto;
+  margin: 6px auto;
   box-sizing: border-box;
   flex-grow: 1;
   overflow: visible;
   position: relative;
   top: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* add shadow to the container */
-  border: 2px solid #ccc; /* add border to the container */
+  border: 1px solid #ccc; /* add border to the container */
   border-radius: 12px; /* add rounded corners to the border */
-  background: #ededed;
+  background: #fff;
 }
 
 .box {
@@ -57,7 +57,7 @@
   position: relative;
   top: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow to the container */
-  border: 2px solid #ccc; /* Add border to the container */
+  border: 1px solid #ccc; /* Add border to the container */
   border-radius: 12px;
   margin-bottom: 15px;
   background: #007ab8;
@@ -93,16 +93,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   position: absolute;
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  background-color: rgba(237, 237, 237, 0.95);
+  background-color: rgba(255, 255, 255, 0.95);
   padding: 5px 10px;
   border-radius: 8px;
+  border: 1px solid #ccc;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: calc(100% - 20px);
 }
 
 .export-dropdown {
@@ -115,7 +117,7 @@
 #exportBtn {
   padding: 5px 10px;
   cursor: pointer;
-  background-color: rgba(237, 237, 237, 0.95);
+  background-color: rgba(255, 255, 255, 0.95);
   border: 1px solid #ccc;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -210,7 +212,7 @@
   grid-column: 1; /* keep on the left */
   grid-row: 1; /* keep aligned with header title */
   justify-self: start;
-  font-size: clamp(9px, 1.8vw, 13px); /* size changes with screen size */
+  font-size: clamp(13px, 1.8vw, 16px); /* size changes with screen size */
   color: #444;
   white-space: nowrap;
 }
@@ -218,7 +220,7 @@
 .lastUpdatedLabel {
   font-weight: 600;
   margin-right: 6px;
-  font-size: clamp(11px, 1.8vw, 15px); /* size changes with screen size */
+  font-size: clamp(14px, 1.8vw, 17px); /* size changes with screen size */
   color: #001489;
 }
 
@@ -242,6 +244,7 @@ body {
   overflow: auto;
   margin: 0;
   padding: 0;
+  background-color: #f9fafc;
 }
 
 h1 {
@@ -251,7 +254,7 @@ h1 {
   font-family:
     "Raleway OTF", "Raleway", Arial, sans-serif; /* Change font family */
   font-weight: 1000; /* Change the boldness */
-  font-size: clamp(16px, 4vw, 32px); /* size changes with screen view width */
+  font-size: clamp(18px, 4vw, 32px); /* size changes with screen view width */
   color: #001489; /* Change text color */
   text-align: center;
   letter-spacing: 0.3px;
@@ -296,7 +299,7 @@ h4 {
   ); /* Dynamic columns based on available space */
   gap: 15px; /* Adds spacing between boxes */
   padding: 20px; /* Adds padding around the container */
-  background-color: #ededed;
+  background-color: #fff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin: 10px auto;
 }
@@ -361,7 +364,7 @@ h4 {
 .sidebar {
   width: 210px;
   flex-shrink: 0;
-  background-color: #007ab8;
+  background-color: #fff;
   display: flex;
   flex-direction: column;
   position: sticky;
@@ -376,7 +379,7 @@ h4 {
   align-items: center;
   gap: 10px;
   padding: 18px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-logo {
@@ -386,7 +389,7 @@ h4 {
 }
 
 .sidebar-name {
-  color: #fff;
+  color: #001489;
   font-family: "Raleway", Arial, sans-serif;
   font-weight: 700;
   font-size: 12px;
@@ -410,7 +413,7 @@ h4 {
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(0, 0, 0, 0.6);
   text-decoration: none;
   border-radius: 8px;
   font-family: "Roboto", Arial, sans-serif;
@@ -420,18 +423,25 @@ h4 {
 }
 
 .nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  background-color: rgba(0, 0, 0, 0.07);
+  color: #001489;
 }
 
 .nav-link.active {
-  background-color: #005a8a;
-  color: #fff;
+  background-color: #e0e0e0;
+  color: #001489;
   font-weight: 500;
 }
 
 .nav-label {
   white-space: nowrap;
+}
+
+.nav-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.7;
 }
 
 /* ── Main content area ────────────────────────────────────────────────── */
@@ -441,7 +451,7 @@ h4 {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  background-color: #fff;
+  background-color: #f9fafc;
 }
 
 /* ── Asset page header ────────────────────────────────────────────────── */
@@ -453,7 +463,7 @@ h4 {
   flex-wrap: wrap;
   gap: 10px;
   padding: 16px 20px;
-  border-bottom: 2px solid #ededed;
+  border-bottom: 2px solid #f9fafc;
 }
 
 .page-title {
@@ -479,7 +489,7 @@ h4 {
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  background-color: #ededed;
+  background-color: #fff;
   border-radius: 10px;
   padding: 10px 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
@@ -525,8 +535,8 @@ h4 {
 
 .chart-card {
   flex: 1 1 420px;
-  background-color: #ededed;
-  border: 2px solid #ccc;
+  background-color: #fff;
+  border: 1px solid #ccc;
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.07);
@@ -555,68 +565,97 @@ h4 {
   font-size: 14px;
 }
 
-/* ── Mobile: sidebar collapses to bottom tab bar ──────────────────────── */
+/* ── Hamburger button (hidden on desktop) ─────────────────────────────── */
+
+.hamburger-btn {
+  display: none;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 99;
+}
+
+.sidebar-overlay.open {
+  display: block;
+}
+
+/* ── Mobile: sidebar becomes a slide-in drawer ────────────────────────── */
 
 @media (max-width: 768px) {
-  body {
-    padding-bottom: 60px;
-  }
-
-  .layout {
-    flex-direction: column;
-  }
-
   .sidebar {
-    width: 100%;
-    height: 60px;
     position: fixed;
-    bottom: 0;
-    top: auto;
-    flex-direction: row;
-    align-items: stretch;
+    top: 0;
+    left: 0;
+    width: 210px;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 100;
+    border-right: 1px solid #ccc;
   }
 
-  .sidebar-brand {
-    display: none;
-  }
-
-  .sidebar-links {
-    display: flex;
-    flex-direction: row;
-    padding: 0;
-    width: 100%;
-  }
-
-  .sidebar-links li {
-    flex: 1;
-    margin: 0;
-  }
-
-  .nav-link {
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 6px 4px;
-    border-radius: 0;
-    font-size: 10px;
-    gap: 2px;
-    height: 100%;
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.15);
   }
 
   .nav-link.active {
-    border-radius: 0;
-    border-top: 3px solid #fff;
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: #e0e0e0;
+    border-top: none;
+    border-radius: 8px;
   }
 
-  .main-content {
-    order: 1;
+  .hamburger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 101;
+    width: 36px;
+    height: 36px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .hamburger-btn span,
+  .hamburger-btn span::before,
+  .hamburger-btn span::after {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: #333;
+    position: relative;
+  }
+
+  .hamburger-btn span::before,
+  .hamburger-btn span::after {
+    content: '';
+    position: absolute;
+  }
+
+  .hamburger-btn span::before { top: -5px; }
+  .hamburger-btn span::after  { top:  5px; }
+
+  h1 {
+    font-size: clamp(12px, 4.2vw, 18px);
+    white-space: nowrap;
+    padding-left: 48px; /* clear the hamburger button */
   }
 }
 
-/* On screens <= 900px, collapse the column header layout
+/* On screens <= 1150px, collapse the column header layout
    into a single-column stack (title on top, timestamp below). */
-@media (max-width: 900px) {
+@media (max-width: 1150px) {
   /* Switch header grid from multi-column to single-column */
   .header {
     grid-template-columns: 1fr;
@@ -630,10 +669,12 @@ h4 {
     justify-self: center;
   }
 
-  /* Keep title on top when stacked */
+  /* Keep title on top when stacked, scale to always fit on one line */
   h1 {
     grid-column: 1;
-    grid-row: 1; /* Ensure title stays first */
+    grid-row: 1;
     justify-self: center;
+    font-size: clamp(12px, 4.2vw, 24px);
+    white-space: nowrap;
   }
 }
