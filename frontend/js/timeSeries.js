@@ -133,10 +133,27 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!suppressZoomEvent) showReset();
   }, { passive: true });
 
+  // Resize the flatpickr input to snugly fit its text content.
+  // Uses canvas text measurement for cross-browser pixel accuracy;
+  // field-sizing:content (CSS) handles modern browsers natively.
+  const _resizeCanvas = document.createElement("canvas");
+  function resizeDateInput(input) {
+    const text = input.value || input.placeholder || "";
+    const styles = getComputedStyle(input);
+    const ctx = _resizeCanvas.getContext("2d");
+    ctx.font = `${styles.fontWeight} ${styles.fontSize} ${styles.fontFamily}`;
+    const textPx = ctx.measureText(text).width;
+    const padL = parseFloat(styles.paddingLeft) || 0;
+    const padR = parseFloat(styles.paddingRight) || 0;
+    const borL = parseFloat(styles.borderLeftWidth) || 0;
+    const borR = parseFloat(styles.borderRightWidth) || 0;
+    input.style.width = `${Math.ceil(textPx + padL + padR + borL + borR + 4)}px`;
+  }
+
   // Initialize flatpickr with range mode for date selection
   const datePicker = flatpickr("#datePicker", {
     mode: "range",
-    dateFormat: "Y-m-d",
+    dateFormat: "M j",
     maxDate: "today", // Set initial max date to today
     onChange: (selectedDates) => {
       if (selectedDates.length === 1) {
@@ -162,7 +179,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // Reset the maxDate to today whenever the date picker opens
       datePicker.set("maxDate", "today");
     },
-    onClose: (selectedDates) => {
+    onClose: (selectedDates, _dateStr, instance) => {
+      resizeDateInput(instance.input);
       if (selectedDates.length === 2) {
         // Validate that the selected range does not exceed one month
         const start = new Date(selectedDates[0]);
@@ -180,6 +198,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
   });
+
+  resizeDateInput(datePicker.input);
 
   document.getElementById("updateChart").addEventListener("click", async () => {
     const updateChartButton = document.getElementById("updateChart");
@@ -285,7 +305,7 @@ function createTimeSeriesChart() {
     animation: false,
     grid: {
       left: 60,
-      top: 55,
+      top: 20,
       right: 60,
       bottom: 110,
     },
@@ -310,6 +330,7 @@ function createTimeSeriesChart() {
           const month = d.toLocaleString("en-US", { timeZone: "America/New_York", month: "short" });
           const day   = d.toLocaleString("en-US", { timeZone: "America/New_York", day: "numeric" });
           const time  = d.toLocaleString("en-US", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit", hour12: false });
+          if (time === "00:00") return `${month} ${day}`;
           return `${month} ${day}\n${time}`;
         },
       },
@@ -354,6 +375,15 @@ function createTimeSeriesChart() {
     },
     dataZoom: [
       { type: "inside", xAxisIndex: 0 }, // scroll wheel / pinch zoom
+    ],
+    media: [
+      {
+        query: { maxWidth: 768 },
+        option: {
+          xAxis: { splitNumber: 6 },
+          grid: { left: 40, right: 8, top: 20, bottom: 140 },
+        },
+      },
     ],
     series: [
       { name: "Solar",          type: "line", data: [], color: "#fe6a35", symbol: "none", lineStyle: { width: 2 } },

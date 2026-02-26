@@ -6,6 +6,7 @@ This is a rewrite of the original PHP-based dashboard. The motivation for the re
 
 - **Faster responses** — Solar and wind API data is fetched server-side every 5 seconds and served from an in-memory cache, reducing `/solar` and `/wind` response times from ~200ms to under 5ms.
 - **Simpler operations** — The original version required three separate processes running simultaneously (web server, data ingestion script, capacity factor script). This version runs everything in a single `uvicorn` process with background tasks, managed by one systemd service.
+- **Simpler deployment** — The PHP version required files to be spread across multiple server directories (`/var/www/html/` for web files, `/etc/` for server config, `/var/log/` for logs, and a separate location for secrets kept outside the document root). FastAPI is its own HTTP server — it owns the entire request lifecycle and decides what is and isn't exposed. Nginx in this setup is just a reverse proxy that forwards traffic to `localhost:8000`; it has no knowledge of the project's file structure. The entire project lives in one directory, secrets stay in `config.py` (gitignored) and never touch the HTTP layer, and there is no document root to worry about.
 - **One language** — All backend logic is in Python. The original version mixed PHP for the web layer with Python scripts for data pipelines. A single-language backend is significantly easier for future collaborators: there is no PHP environment to configure, no context-switching between two runtimes, and the entire codebase can be understood, modified, and debugged using only Python tooling.
 - **Auto-generated API docs** — FastAPI provides interactive documentation at `/docs`, making the API easier to understand and test.
 - **Replaced Highcharts with Apache ECharts** — Highcharts Stock (`highstock.js`) requires a paid commercial license and caused CDN load failures that silently broke the time series chart. ECharts is Apache 2.0 licensed (free for commercial use) and is now bundled from a CDN with no licensing concerns.
@@ -197,30 +198,60 @@ http://localhost:8000
 
 ## Deploying to the Server
 
-### 1. Clone the repo
+### First-time deployment (replacing the PHP version)
 
-SSH into the server and clone into the home directory:
+Both versions share the same database, so there is no data migration. The strategy is to run FastAPI alongside PHP, test it, then do an instant cutover. The database is the source of truth — just flip the traffic.
+
+#### 1. Clone the repo on the server
+
+SSH in and clone into the home directory:
 
 ```bash
 cd /home/ec2-user
 git clone https://github.com/NickOverstreet/Renewable-Energy-Dashboard
 ```
 
-### 2. Copy `config.py` to the server
+#### 2. Copy `config.py` to the server
 
-`config.py` is gitignored and must be transferred manually. From your local machine:
+`config.py` is gitignored and must be transferred manually. Point it at the same RDS database the PHP version uses. From your local machine:
 
 ```bash
 scp -i dashboard.pem backend/config.py ec2-user@<server-ip>:/home/ec2-user/Renewable-Energy-Dashboard/backend/config.py
 ```
 
-### 3. Install dependencies on the server
+#### 3. Install dependencies
 
 ```bash
 pip3 install fastapi uvicorn pymysql python-dotenv
 ```
 
-### 4. Pull updates (after code changes)
+#### 4. Start FastAPI on port 8000 and test it
+
+Create and enable the systemd service (see [Server Setup](#server-setup-systemd) below), then start it:
+
+```bash
+sudo systemctl start dashboard
+```
+
+The PHP version continues serving traffic on port 80. FastAPI runs on port 8000. Both write to the same database simultaneously — this is fine, they insert independent rows. Test the FastAPI version thoroughly at `http://<server-ip>:8000` — live data, historical charts, all pages. Let it run alongside PHP for as long as needed.
+
+#### 5. Cutover (~1 second of downtime)
+
+When ready, update the nginx config to proxy to FastAPI instead of serving PHP directly, then stop the PHP processes in one shot:
+
+```bash
+sudo nginx -s reload && sudo systemctl stop apache2 && sudo systemctl stop ingestion && sudo systemctl stop capacity_factors
+```
+
+The gap from this cutover (~5 seconds for FastAPI's cache to warm up) is automatically detected and marked with a NULL sentinel row in the database on startup, so the chart renders an explicit gap instead of interpolating across missing time.
+
+#### 6. Keep PHP intact for at least a week
+
+Do not delete PHP files or uninstall Apache immediately. If something breaks, reverse the nginx config and restart the PHP processes to roll back instantly. Decommission PHP only after FastAPI has been stable in production.
+
+---
+
+### Routine updates (after code changes)
 
 ```bash
 cd /home/ec2-user/Renewable-Energy-Dashboard

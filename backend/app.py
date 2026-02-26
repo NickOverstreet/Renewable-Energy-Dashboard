@@ -4,7 +4,7 @@ import json
 import logging
 import threading
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import httpx
 import pymysql
@@ -259,10 +259,60 @@ def _run_capacity_factors():
         connection.close()
 
 
+# ── Startup: mark any downtime gap with a NULL sentinel row ──────────────────
+
+def _mark_downtime_gap():
+    """
+    Called once on startup. If the last row in historical_data is older than
+    10 seconds, the server was down. Insert a single all-NULL row timestamped
+    5 seconds after the last row so the frontend chart renders an explicit gap
+    instead of silently interpolating across missing time.
+    """
+    try:
+        connection = pymysql.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,
+            cursorclass=pymysql.cursors.DictCursor,
+        )
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT MAX(date_time) AS last FROM historical_data")
+                row = cursor.fetchone()
+                last = row["last"] if row else None
+
+            if last is None:
+                return  # empty table — nothing to mark
+
+            # Make last timezone-aware for comparison
+            if last.tzinfo is None:
+                last = last.replace(tzinfo=timezone.utc)
+
+            gap_seconds = (datetime.now(timezone.utc) - last).total_seconds()
+            if gap_seconds > 10:
+                sentinel_time = last + timedelta(seconds=5)
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "INSERT INTO historical_data (date_time) VALUES (%s)",
+                        (sentinel_time,),
+                    )
+                connection.commit()
+                logging.info(
+                    f"Downtime gap of {gap_seconds:.0f}s detected — "
+                    f"NULL sentinel row inserted at {sentinel_time}"
+                )
+        finally:
+            connection.close()
+    except Exception as e:
+        logging.error(f"Gap detection error: {e}")
+
+
 # ── Lifespan: start all three background tasks on startup ────────────────────
 
 @asynccontextmanager
 async def lifespan(app):
+    await asyncio.to_thread(_mark_downtime_gap)
     asyncio.create_task(refresh_cache())
     asyncio.create_task(asyncio.to_thread(ingest_loop))
     asyncio.create_task(asyncio.to_thread(capacity_loop))
