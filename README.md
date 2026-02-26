@@ -237,17 +237,50 @@ The PHP version continues serving traffic on port 80. FastAPI runs on port 8000.
 
 #### 5. Cutover (~1 second of downtime)
 
-When ready, update the nginx config to proxy to FastAPI instead of serving PHP directly, then stop the PHP processes in one shot:
+**This server uses Apache (httpd) — nginx is not installed.** The `/etc/nginx/` directory exists but nothing uses it. The cutover is done by switching Apache from serving PHP files to proxying all traffic to FastAPI using Apache's built-in `mod_proxy`.
+
+First, check what the current Apache config looks like:
 
 ```bash
-sudo nginx -s reload && sudo systemctl stop apache2 && sudo systemctl stop ingestion && sudo systemctl stop capacity_factors
+ls /etc/httpd/conf.d/
+cat /etc/httpd/conf/httpd.conf
 ```
 
-The gap from this cutover (~5 seconds for FastAPI's cache to warm up) is automatically detected and marked with a NULL sentinel row in the database on startup, so the chart renders an explicit gap instead of interpolating across missing time.
+Create a new proxy config file that overrides the PHP setup:
+
+```bash
+sudo tee /etc/httpd/conf.d/dashboard.conf > /dev/null <<'EOF'
+<VirtualHost *:80>
+    ProxyPreserveHost On
+    ProxyPass / http://127.0.0.1:8000/
+    ProxyPassReverse / http://127.0.0.1:8000/
+</VirtualHost>
+EOF
+```
+
+Test and reload Apache, then stop PHP-FPM:
+
+```bash
+sudo apachectl configtest        # check for syntax errors
+sudo systemctl reload httpd      # apply instantly — no connections dropped
+sudo systemctl stop php-fpm      # stop PHP processing
+```
+
+From the moment httpd reloads, all port 80 traffic goes to FastAPI. FastAPI is already running and warmed up on port 8000, so there is no gap from the Apache change itself. The only gap is the ~5 seconds it took FastAPI to warm its cache on first start, which was already marked with a NULL sentinel row automatically.
+
+> **Note:** `mod_proxy` and `mod_proxy_http` are compiled into Amazon Linux's Apache by default — no extra installation needed.
 
 #### 6. Keep PHP intact for at least a week
 
-Do not delete PHP files or uninstall Apache immediately. If something breaks, reverse the nginx config and restart the PHP processes to roll back instantly. Decommission PHP only after FastAPI has been stable in production.
+Do not delete PHP files or uninstall Apache immediately. To roll back, delete `/etc/httpd/conf.d/dashboard.conf`, restart httpd, and restart php-fpm:
+
+```bash
+sudo rm /etc/httpd/conf.d/dashboard.conf
+sudo systemctl reload httpd
+sudo systemctl start php-fpm
+```
+
+Decommission PHP only after FastAPI has been stable in production.
 
 ---
 
