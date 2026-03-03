@@ -107,7 +107,7 @@ def get_wind_data(
     sql_with_speed = """
     SELECT
         FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(date_time) / %s) * %s) AS interval_time,
-        ROUND(AVG(COALESCE(wind_generation, wind_percentage * 0.9)), 2) AS power_kw,
+        ROUND(AVG(COALESCE(NULLIF(wind_generation, 0), wind_percentage * 0.9)), 2) AS power_kw,
         ROUND(AVG(wind_speed), 2)      AS wind_speed
     FROM historical_data
     WHERE date_time >= %s AND date_time <= %s
