@@ -19,7 +19,7 @@ This is a rewrite of the original PHP-based dashboard. The motivation for the re
 Renewable-Energy-Dashboard/
 ├── backend/
 │   ├── app.py                              # FastAPI app + all three background tasks
-│   ├── cache.py                            # Shared in-memory cache (solar + wind)
+│   ├── cache.py                            # Shared in-memory cache
 │   ├── database.py                         # MySQL connection helper
 │   ├── config.py                           # Credentials — gitignored, do not commit
 │   ├── configExample.py                    # Template for config.py
