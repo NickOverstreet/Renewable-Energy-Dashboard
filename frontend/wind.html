@@ -50,7 +50,7 @@
                     <label class="date-label">Select Date Range:</label>
                     <input type="text" id="datePicker" placeholder="Select date range" readonly>
                     <button id="updateChart">Update</button>
-                    <button id="resetChart">Reset</button>
+                    <button id="resetChart" style="display:inline-block;">Reset</button>
                 </div>
 
                 <!-- Live stat cards — populated every 5s from /live/wind -->
@@ -80,18 +80,24 @@
                 <!-- Charts -->
                 <div class="chart-row">
                     <div class="chart-card">
-                        <p class="chart-card-title">Wind Capacity Factor vs. Wind Speed</p>
-                        <div class="chart-placeholder" id="chartCFvsSpeed">Chart coming soon</div>
-                    </div>
-                    <div class="chart-card">
-                        <p class="chart-card-title">Wind Rose — Dominant Wind Direction</p>
-                        <div class="chart-placeholder" id="chartWindRose">Chart coming soon</div>
+                        <p class="chart-card-title">Wind Power Over Time</p>
+                        <div id="chartWindPower" style="height:340px;"></div>
                     </div>
                 </div>
                 <div class="chart-row">
                     <div class="chart-card">
-                        <p class="chart-card-title">Wind Power Over Time</p>
-                        <div class="chart-placeholder" id="chartWindPower">Chart coming soon</div>
+                        <p class="chart-card-title">Power Curve — Actual vs. Manufacturer Spec</p>
+                        <div id="chartPowerCurve" style="height:340px;"></div>
+                    </div>
+                    <div class="chart-card">
+                        <p class="chart-card-title">Power Output Distribution</p>
+                        <div id="chartPowerHistogram" style="height:340px;"></div>
+                    </div>
+                </div>
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <p class="chart-card-title">Duration Curve</p>
+                        <div id="chartDurationCurve" style="height:340px;"></div>
                     </div>
                 </div>
 
@@ -99,6 +105,310 @@
         </div><!-- end .main-content -->
 
     </div><!-- end .layout -->
+
+    <!-- Wind analytics charts (Power Over Time, Power Curve, Histogram, Duration Curve) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const RATED_KW = 90;
+
+            // Approximate manufacturer power curve for a 90 kW HAWT.
+            // Cut-in: ~3.5 m/s  |  Rated: ~12.5 m/s  |  Cut-out: ~25 m/s
+            // TODO: replace these values with the actual manufacturer power curve data.
+            const THEORETICAL_CURVE = [
+                [0, 0], [1, 0], [2, 0], [3, 0], [3.5, 0],
+                [4, 1], [5, 4], [6, 8], [7, 14], [8, 22],
+                [9, 32], [10, 45], [11, 61], [12, 79], [12.5, 90],
+                [13, 90], [15, 90], [20, 90], [25, 90],
+            ];
+
+            const axisNameStyle = {
+                color: '#298fc2',
+                fontFamily: 'Times New Roman',
+                fontWeight: 'bold',
+                fontSize: 13,
+            };
+
+            const chartPowerTime     = echarts.init(document.getElementById('chartWindPower'));
+            const chartPowerCurve    = echarts.init(document.getElementById('chartPowerCurve'));
+            const chartHistogram     = echarts.init(document.getElementById('chartPowerHistogram'));
+            const chartDurationCurve = echarts.init(document.getElementById('chartDurationCurve'));
+
+            window.addEventListener('resize', () => {
+                chartPowerTime.resize();
+                chartPowerCurve.resize();
+                chartHistogram.resize();
+                chartDurationCurve.resize();
+            });
+
+            // ── Render: Wind Power Over Time ─────────────────────────────
+            function renderPowerTime(data, resetZoom = false) {
+                const series = data.timestamps.map((t, i) => [new Date(t).getTime(), data.power_kw[i]]);
+                const option = {
+                    animation: false,
+                    grid: { left: 60, right: 20, top: 20, bottom: 50 },
+                    xAxis: {
+                        type: 'time',
+                        name: 'Date (EST)',
+                        nameLocation: 'middle',
+                        nameGap: 38,
+                        nameTextStyle: axisNameStyle,
+                        axisLabel: {
+                            fontFamily: 'Roboto, Arial, sans-serif',
+                            formatter: function (value) {
+                                const d = new Date(value);
+                                const mo = d.toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short' });
+                                const dy = d.toLocaleString('en-US', { timeZone: 'America/New_York', day: 'numeric' });
+                                const hr = d.toLocaleString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false });
+                                return hr === '00:00' ? `${mo} ${dy}` : `${mo} ${dy}\n${hr}`;
+                            },
+                        },
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: 'Power (kW)',
+                        nameLocation: 'middle',
+                        nameGap: 45,
+                        nameTextStyle: axisNameStyle,
+                        min: 0,
+                        max: RATED_KW,
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: (params) => {
+                            const t = new Date(params[0].value[0]).toLocaleString('en-US', {
+                                timeZone: 'America/New_York', month: 'short', day: 'numeric',
+                                hour: '2-digit', minute: '2-digit', hour12: false,
+                            });
+                            return `${t}<br/><b>${params[0].value[1]} kW</b>`;
+                        },
+                        textStyle: { fontFamily: 'Roboto, Arial, sans-serif' },
+                    },
+                    dataZoom: [{ type: 'inside', start: 0, end: 100 }],
+                    series: [{
+                        type: 'line',
+                        data: series,
+                        color: '#2caffe',
+                        symbol: 'none',
+                        lineStyle: { width: 1.5 },
+                        areaStyle: { color: 'rgba(44,175,254,0.08)' },
+                    }],
+                };
+                if (resetZoom) option.dataZoom = [{ type: 'inside', start: 0, end: 100 }];
+                chartPowerTime.setOption(option);
+            }
+
+            // ── Render: Power Curve ──────────────────────────────────────
+            function renderPowerCurve(data) {
+                const scatterData = data.wind_speed
+                    .map((ws, i) => (ws !== null ? [ws, data.power_kw[i]] : null))
+                    .filter(Boolean);
+
+                chartPowerCurve.setOption({
+                    animation: false,
+                    grid: { left: 60, right: 20, top: 20, bottom: 80 },
+                    legend: {
+                        bottom: 8,
+                        data: ['Actual', 'Manufacturer Spec (approx.)'],
+                        textStyle: { fontFamily: 'Roboto, Arial, sans-serif', fontSize: 12 },
+                    },
+                    xAxis: {
+                        type: 'value',
+                        name: 'Wind Speed (m/s)',
+                        nameLocation: 'middle',
+                        nameGap: 30,
+                        nameTextStyle: axisNameStyle,
+                        min: 0,
+                        max: 25,
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: 'Power (kW)',
+                        nameLocation: 'middle',
+                        nameGap: 45,
+                        nameTextStyle: axisNameStyle,
+                        min: 0,
+                        max: RATED_KW,
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: (p) => `${p.seriesName}<br/>Speed: ${p.value[0]} m/s<br/>Power: ${p.value[1]} kW`,
+                        textStyle: { fontFamily: 'Roboto, Arial, sans-serif' },
+                    },
+                    series: [
+                        {
+                            name: 'Actual',
+                            type: 'scatter',
+                            data: scatterData,
+                            symbolSize: 3,
+                            itemStyle: { color: 'rgba(44,175,254,0.45)' },
+                        },
+                        {
+                            name: 'Manufacturer Spec (approx.)',
+                            type: 'line',
+                            data: THEORETICAL_CURVE,
+                            lineStyle: { color: '#e05c5c', width: 2 },
+                            itemStyle: { color: '#e05c5c' },
+                            symbol: 'none',
+                            smooth: true,
+                        },
+                    ],
+                });
+            }
+
+            // ── Render: Power Output Distribution (histogram) ────────────
+            function renderHistogram(data) {
+                const BIN = 10;
+                const numBins = Math.ceil(RATED_KW / BIN); // 9
+                const counts = new Array(numBins).fill(0);
+                data.power_kw.forEach(kw => {
+                    if (kw === null) return;
+                    counts[Math.min(Math.floor(kw / BIN), numBins - 1)]++;
+                });
+                const labels = Array.from({ length: numBins }, (_, i) => `${i * BIN}–${(i + 1) * BIN}`);
+                chartHistogram.setOption({
+                    animation: false,
+                    grid: { left: 60, right: 20, top: 20, bottom: 65 },
+                    xAxis: {
+                        type: 'category',
+                        data: labels,
+                        name: 'Power (kW)',
+                        nameLocation: 'middle',
+                        nameGap: 38,
+                        nameTextStyle: axisNameStyle,
+                        axisLabel: { fontFamily: 'Roboto, Arial, sans-serif', rotate: 30, fontSize: 11 },
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: 'Readings',
+                        nameLocation: 'middle',
+                        nameGap: 45,
+                        nameTextStyle: axisNameStyle,
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: (params) => `${params[0].name} kW<br/><b>${params[0].value.toLocaleString()} readings</b>`,
+                        textStyle: { fontFamily: 'Roboto, Arial, sans-serif' },
+                    },
+                    series: [{
+                        type: 'bar',
+                        data: counts,
+                        itemStyle: { color: '#298fc2' },
+                        barMaxWidth: 48,
+                    }],
+                });
+            }
+
+            // ── Render: Duration Curve ───────────────────────────────────
+            function renderDurationCurve(data) {
+                const sorted = data.power_kw
+                    .filter(v => v !== null)
+                    .sort((a, b) => b - a);
+                const n = sorted.length;
+                const durationData = sorted.map((kw, i) => [
+                    parseFloat(((i / n) * 100).toFixed(2)),
+                    kw,
+                ]);
+                chartDurationCurve.setOption({
+                    animation: false,
+                    grid: { left: 60, right: 20, top: 20, bottom: 50 },
+                    xAxis: {
+                        type: 'value',
+                        name: '% of Time',
+                        nameLocation: 'middle',
+                        nameGap: 30,
+                        nameTextStyle: axisNameStyle,
+                        min: 0,
+                        max: 100,
+                        axisLabel: { formatter: '{value}%', fontFamily: 'Roboto, Arial, sans-serif' },
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: 'Power (kW)',
+                        nameLocation: 'middle',
+                        nameGap: 45,
+                        nameTextStyle: axisNameStyle,
+                        min: 0,
+                        max: RATED_KW,
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: (params) => {
+                            const [pct, kw] = params[0].value;
+                            return `${pct.toFixed(1)}% of time<br/><b>≥ ${kw} kW</b>`;
+                        },
+                        textStyle: { fontFamily: 'Roboto, Arial, sans-serif' },
+                    },
+                    series: [{
+                        type: 'line',
+                        data: durationData,
+                        color: '#298fc2',
+                        symbol: 'none',
+                        lineStyle: { width: 2 },
+                        areaStyle: { color: 'rgba(41,143,194,0.12)' },
+                    }],
+                });
+            }
+
+            // ── Fetch from /wind-data and render all charts ──────────────
+            async function fetchAndRender(startDate, endDate, resetZoom = false) {
+                [chartPowerTime, chartPowerCurve, chartHistogram, chartDurationCurve]
+                    .forEach(c => c.showLoading({ text: 'Loading…', fontSize: 13 }));
+                try {
+                    const res  = await fetch(`${API_BASE_URL}/wind-data?startDate=${startDate}&endDate=${endDate}`);
+                    const data = await res.json();
+                    if (data.error) { console.error('Wind data error:', data.error); return; }
+                    renderPowerTime(data, resetZoom);
+                    renderPowerCurve(data);
+                    renderHistogram(data);
+                    renderDurationCurve(data);
+                } catch (err) {
+                    console.error('Wind analytics fetch error:', err);
+                } finally {
+                    [chartPowerTime, chartPowerCurve, chartHistogram, chartDurationCurve]
+                        .forEach(c => c.hideLoading());
+                }
+            }
+
+            // ── Date picker ──────────────────────────────────────────────
+            let startDate = null;
+            let endDate   = null;
+
+            const datePicker = flatpickr('#datePicker', {
+                mode: 'range',
+                dateFormat: 'M j',
+                maxDate: 'today',
+                onChange: (dates) => {
+                    if (dates.length === 2) {
+                        startDate = dates[0].toISOString().split('T')[0];
+                        endDate   = dates[1].toISOString().split('T')[0];
+                    }
+                },
+                onOpen: () => datePicker.set('maxDate', 'today'),
+            });
+
+            function resetToDefault() {
+                const end   = new Date();
+                const start = new Date();
+                start.setDate(start.getDate() - 30);
+                startDate = start.toISOString().split('T')[0];
+                endDate   = end.toISOString().split('T')[0];
+                datePicker.clear();
+                fetchAndRender(startDate, endDate, true);
+            }
+
+            document.getElementById('updateChart').addEventListener('click', () => {
+                if (startDate && endDate) {
+                    fetchAndRender(startDate, endDate);
+                } else {
+                    alert('Please select a complete date range.');
+                }
+            });
+
+            document.getElementById('resetChart').addEventListener('click', resetToDefault);
+
+            resetToDefault();
+        });
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

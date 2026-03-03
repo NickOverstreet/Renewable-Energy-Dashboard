@@ -109,6 +109,7 @@ def ingest_loop():
                 sol_dual_gen  = _fmt(s.get("Solar 360 Trackers (kW)", 0))
                 hydro_gen     = _fmt(s.get("Hydro Generation (kW)", 0))
                 wind_gen      = _fmt(w.get("power", 0))
+                wind_speed    = _fmt(w.get("wind_speed", 0))
 
                 with connection.cursor() as cursor:
                     cursor.execute(
@@ -120,8 +121,8 @@ def ingest_loop():
                             solar_fixed_percentage, solar_360_percentage,
                             solar_total_generation, hydro_generation,
                             solar_fixed_generation, solar_dual_generation,
-                            wind_generation
-                        ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                            wind_generation, wind_speed
+                        ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                         """,
                         (
                             datetime.now(timezone.utc),
@@ -129,7 +130,7 @@ def ingest_loop():
                             sol_fixed, sol_360,
                             sol_total_gen, hydro_gen,
                             sol_fixed_gen, sol_dual_gen,
-                            wind_gen,
+                            wind_gen, wind_speed,
                         ),
                     )
                 connection.commit()
