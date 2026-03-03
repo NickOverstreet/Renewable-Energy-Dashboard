@@ -200,7 +200,7 @@ http://localhost:8000
 
 ### First-time deployment (replacing the PHP version)
 
-Both versions share the same database, so there is no data migration. The strategy is to run FastAPI alongside PHP, test it, then do an instant cutover. The database is the source of truth — just flip the traffic.
+Both versions share the same database, so there is no data migration. The strategy is to run FastAPI alongside PHP, test it, then do an instant cutover.
 
 #### 1. Clone the repo on the server
 
