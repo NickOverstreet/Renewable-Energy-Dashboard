@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin – RIRF</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="assets/images/faviconv2.svg">
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+</head>
+<body style="background-color: #FFFFFF; display:none">
+    <div class="layout">
+
+        <!-- Sidebar navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-brand">
+                <img src="assets/images/faviconv2.svg" alt="RIRF" class="sidebar-logo">
+                <span class="sidebar-name">Renewable Integration<br>Research Facility</span>
+            </div>
+            <ul class="sidebar-links">
+                <li><a href="/" class="nav-link"><img src="/assets/images/gauge-icon.svg" class="nav-icon" alt=""><span class="nav-label">Overview</span></a></li>
+                <li><a href="/wind" class="nav-link"><img src="/assets/images/wind-turbine-icon.svg" class="nav-icon" alt=""><span class="nav-label">Wind</span></a></li>
+                <li><a href="/solar" class="nav-link"><img src="/assets/images/sun-icon.svg" class="nav-icon" alt=""><span class="nav-label">Solar</span></a></li>
+                <li><a href="/hydro" class="nav-link"><img src="/assets/images/droplet-icon.svg" class="nav-icon" alt=""><span class="nav-label">Hydro</span></a></li>
+                <li><a href="/battery" class="nav-link"><img src="/assets/images/battery-icon.svg" class="nav-icon" alt=""><span class="nav-label">Battery</span></a></li>
+            </ul>
+            <div class="sidebar-bottom">
+                <a href="#" class="nav-link" onclick="logout();return false;"><img src="/assets/user.svg" class="nav-icon" alt=""><span class="nav-label">Log Out</span></a>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>Admin</h1>
+                <button id="logoutBtn" onclick="logout()" style="margin-left:auto; padding: 6px 14px; cursor:pointer;">Log Out</button>
+            </div>
+
+            <div class="container">
+                <div class="boxT">
+                    <h3>Welcome, <span id="adminUsername"></span></h3>
+                    <p>This is the admin panel. Add admin-specific content here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Verify the stored JWT with the server before revealing the page.
+        // The body starts hidden (display:none) to prevent a flash of protected
+        // content while the async check is in flight. If requireAuth() returns
+        // undefined (no token / invalid token) it has already redirected to
+        // /login, so the early return here just stops the rest from running.
+        requireAuth().then(username => {
+            if (!username) return;
+            document.getElementById("adminUsername").textContent = username;
+            document.body.style.display = "";
+        });
+    </script>
+</body>
+</html>

@@ -711,3 +711,99 @@ h4 {
     white-space: nowrap;
   }
 }
+
+/* ── Sidebar login button ───────────────────────────────────────────────── */
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 8px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+
+@media (max-width: 768px) {
+  .sidebar-bottom {
+    display: none;
+  }
+}
+
+/* ── Login page ─────────────────────────────────────────────────────────── */
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.login-box {
+  background: #fff;
+  border: 1px solid #dde3ea;
+  border-radius: 10px;
+  padding: 40px 36px;
+  width: 340px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.login-logo {
+  width: 56px;
+  margin-bottom: 12px;
+}
+
+.login-box h2 {
+  margin: 0 0 24px;
+  font-size: 1.3rem;
+  color: #1a2b45;
+}
+
+.login-field {
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.login-field label {
+  display: block;
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.login-field input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.login-field input:focus {
+  outline: none;
+  border-color: #298fc2;
+}
+
+.login-error {
+  color: #c0392b;
+  font-size: 0.85rem;
+  min-height: 1.2em;
+  margin-bottom: 10px;
+}
+
+.login-box button[type="submit"] {
+  width: 100%;
+  padding: 9px;
+  background-color: #298fc2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.login-box button[type="submit"]:hover {
+  background-color: #1f6f9a;
+}
+
+.login-box button[type="submit"]:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}

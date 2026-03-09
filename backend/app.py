@@ -2,20 +2,26 @@ import os
 import asyncio
 import json
 import logging
+import secrets
 import threading
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 
 import httpx
 import pymysql
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
+from jose import JWTError, jwt
+from pydantic import BaseModel
 
 from config import (
     SOLAR_JSON_URL, WIND_API_URL, WIND_API_TOKEN,
     DB_HOST, DB_USER, DB_PASSWORD, DB_NAME,
     LOG_FILE_INGESTION,
+    ADMIN_USERNAME, ADMIN_PASSWORD, JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRE_HOURS,
 )
 from routers import energy, live
 import cache
@@ -341,10 +347,67 @@ async def cache_control(request: Request, call_next):
     return response
 
 
+# ── Auth ─────────────────────────────────────────────────────────────────────
+# JWT-based admin authentication. Credentials and secrets are set in config.py.
+# Flow: POST /login → server validates credentials → returns a signed JWT →
+# client stores it in localStorage → subsequent requests include it as a
+# Bearer token → GET /admin/verify confirms validity before showing admin page.
+
+# FastAPI's HTTPBearer extracts the "Authorization: Bearer <token>" header.
+_bearer = HTTPBearer()
+
+# Request body schema for POST /login
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+def require_auth(credentials: HTTPAuthorizationCredentials = Depends(_bearer)):
+    """Dependency injected into protected routes. Decodes and validates the JWT,
+    returning the username (stored in the 'sub' claim) on success."""
+    try:
+        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload["sub"]
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+@app.post("/login")
+async def login(req: LoginRequest):
+    """Validates admin credentials and returns a signed JWT on success.
+    Uses secrets.compare_digest to prevent timing-based side-channel attacks."""
+    username_ok = secrets.compare_digest(req.username, ADMIN_USERNAME)
+    password_ok = secrets.compare_digest(req.password, ADMIN_PASSWORD)
+    if not (username_ok and password_ok):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    token = jwt.encode(
+        {"sub": req.username, "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRE_HOURS)},
+        JWT_SECRET,
+        algorithm=JWT_ALGORITHM,
+    )
+    return {"token": token}
+
+@app.get("/admin/verify")
+async def verify_token(username: str = Depends(require_auth)):
+    """Called by admin.html on load to confirm the stored token is still valid.
+    Returns the username so the page can display a welcome message."""
+    return {"username": username}
+
+
 # API routes — must be registered before the static file mount so they take priority
 app.include_router(energy.router)
 app.include_router(live.router)
 
 # Serve the frontend from /  (html=True makes index.html the default for /)
 frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
+
+# Clean URLs — serve HTML pages without the .html extension.
+# These routes must be registered before the StaticFiles mount below so they
+# take priority; otherwise StaticFiles would only match /page.html, not /page.
+_pages = ["wind", "solar", "hydro", "battery", "admin", "login"]
+for _page in _pages:
+    _path = os.path.join(frontend_dir, f"{_page}.html")
+    # The default-argument trick (p=_path) captures the current value of _path
+    # in each iteration — without it, all lambdas would reference the same
+    # variable and serve only the last page in the list.
+    app.add_api_route(f"/{_page}", lambda p=_path: FileResponse(p), methods=["GET"])
+
 app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")

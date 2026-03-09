@@ -4,3 +4,4 @@ pymysql
 pytz
 httpx
 aiofiles
+python-jose[cryptography]
